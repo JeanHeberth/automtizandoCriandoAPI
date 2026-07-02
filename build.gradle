@@ -1,0 +1,41 @@
+plugins {
+    id 'java'
+}
+
+group = 'br.com.automatizandoCriandoAPI'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+dependencies {
+    implementation 'io.rest-assured:rest-assured:5.5.0'
+    implementation 'org.yaml:snakeyaml:2.3'
+    implementation 'io.github.cdimascio:dotenv-java:3.2.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.2'
+
+    implementation 'org.slf4j:slf4j-api:2.0.16'
+    implementation 'org.slf4j:slf4j-simple:2.0.16'
+
+    implementation 'org.projectlombok:lombok:1.18.46'
+    annotationProcessor 'org.projectlombok:lombok:1.18.46'
+
+    testImplementation 'org.testng:testng:7.10.2'
+}
+
+
+test {
+    useTestNG() {
+    }
+
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}

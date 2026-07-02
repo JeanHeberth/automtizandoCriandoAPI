@@ -1,0 +1,8 @@
+api:
+  baseUri: http://100.83.72.100:9999/criandoAPI/v1
+
+
+  endpoints:
+    produtos: /produtos
+    login:    /auth/login
+    pedidos:  /pedidos
