@@ -1,14 +1,23 @@
 package factories.usuario;
 
 import models.request.usuario.UsuarioRequest;
+import utils.RandomUtils;
+
+import java.util.UUID;
+
+import static utils.RandomUtils.*;
 
 public class UsuarioFactory {
 
     public static UsuarioRequest usuarioValido() {
+
+        String id = unique();
+
         UsuarioRequest usuario = new UsuarioRequest();
-        usuario.setNome("Usuario Teste");
-        usuario.setEmail("usuario" + System.currentTimeMillis() + "@email.com");
+        usuario.setNome("Usuario Teste " + id);
+        usuario.setEmail("usuario" + id + "@email.com");
         usuario.setSenha("SenhaSegura123!");
+
         return usuario;
     }
 
