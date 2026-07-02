@@ -1,11 +1,10 @@
 package base;
 
-import auth.AuthService;
-import io.restassured.RestAssured;
 import org.testng.annotations.BeforeClass;
 
+import static auth.TokenManager.getToken;
 import static config.Configuration.getBaseUri;
-import static io.restassured.RestAssured.*;
+import static io.restassured.RestAssured.baseURI;
 
 public class BaseTest {
 
@@ -14,6 +13,6 @@ public class BaseTest {
     @BeforeClass
     public void setup() {
         baseURI = getBaseUri();
-        token = AuthService.getToken();
+        token = getToken();
     }
 }
