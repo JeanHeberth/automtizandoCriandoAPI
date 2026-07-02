@@ -1,11 +1,13 @@
 package health;
 
 import base.BaseTest;
+import constants.endpoints.Endpoint;
 import org.testng.annotations.Test;
 
 import java.util.logging.Logger;
 
 import static config.Configuration.getEndpoint;
+import static constants.endpoints.Endpoint.*;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -19,7 +21,7 @@ public class HealthCheckTest extends BaseTest {
 
         given()
                 .when()
-                .get(getEndpoint("health"))
+                .get(HEALTH_CHECK.getUrl())
                 .then()
                 .statusCode(200)
                 .body("status", equalTo("UP"));

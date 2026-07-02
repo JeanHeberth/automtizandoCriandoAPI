@@ -1,6 +1,7 @@
 package pedido;
 
 import base.BaseTest;
+import constants.endpoints.Endpoint;
 import factories.pedido.PedidoFactory;
 import factories.produto.ProdutoFactory;
 import models.request.pedido.PedidoRequest;
@@ -8,6 +9,7 @@ import models.request.produto.ProdutoRequest;
 import org.testng.annotations.Test;
 
 import static config.Configuration.getEndpoint;
+import static constants.endpoints.Endpoint.*;
 import static io.restassured.RestAssured.given;
 
 public class PedidoTest extends BaseTest {
@@ -23,7 +25,7 @@ public class PedidoTest extends BaseTest {
                         .header("Authorization", "Bearer " + token)
                         .body(produto)
                         .when()
-                        .post(getEndpoint("produtos"))
+                        .post(PRODUTOS.getUrl())
                         .then()
                         .statusCode(201)
                         .extract()
@@ -36,7 +38,7 @@ public class PedidoTest extends BaseTest {
                 .header("Authorization", "Bearer " + token)
                 .body(pedido)
                 .when()
-                .post(getEndpoint("pedidos"))
+                .post(PEDIDOS.getUrl())
                 .then()
                 .statusCode(201);
     }

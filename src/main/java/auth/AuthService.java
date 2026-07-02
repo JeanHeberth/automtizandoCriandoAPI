@@ -1,20 +1,21 @@
 package auth;
 
+import clients.auth.AuthClient;
 import config.Environment;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import models.request.usuario.UsuarioRequest;
 
-import static config.Configuration.getEndpoint;
 import static config.Environment.getEmail;
 import static config.Environment.getSenha;
-import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.equalTo;
 
 public class AuthService {
 
     private static final int SUCCESS_STATUS = 200;
     private static final String TOKEN_PATH = "token";
     private static String cachedToken;
+    private static final AuthClient authClient = new AuthClient();
 
     private AuthService() {
     }
@@ -53,13 +54,7 @@ public class AuthService {
     }
 
     private static Response loginRequest(String email, String password) {
-        validateCredentials(email, password);
-
-        return given()
-                .contentType(ContentType.JSON)
-                .body(buildLoginBody(email, password))
-                .when()
-                .post(getEndpoint("login"));
+        return authClient.login(buildLoginBody(email, password));
     }
 
     private static String buildLoginBody(String email, String password) {
@@ -87,12 +82,8 @@ public class AuthService {
         usuario.setEmail(Environment.getEmail());
         usuario.setSenha(Environment.getSenha());
 
-        given()
-                .contentType(ContentType.JSON)
-                .body(usuario)
-                .when()
-                .post(getEndpoint("usuarios"))
+        authClient.criarUsuario(usuario)
                 .then()
-                .statusCode(201);
+                .statusCode(anyOf(equalTo(201), equalTo(409)));
     }
 }

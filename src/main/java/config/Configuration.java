@@ -37,7 +37,7 @@ public class Configuration {
     public static String getEndpoint(String endpointName){
         Map<String, Object> api = getSection("api");
 
-        Map<String, Object> endpoints = (Map<String, Object>) api.get("endpoints");
+        Map<String, Object> endpoints = (Map<String, Object>) api.get("constants/endpoints");
         return (String) endpoints.get(endpointName);
     }
 
