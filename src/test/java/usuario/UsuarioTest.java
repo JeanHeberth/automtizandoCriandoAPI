@@ -1,4 +1,4 @@
-package usario;
+package usuario;
 
 import base.BaseTest;
 import clients.usuario.UsuarioClient;
