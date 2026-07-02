@@ -1,4 +1,4 @@
-package models.request;
+package models.request.produto;
 
 import lombok.Getter;
 import lombok.Setter;

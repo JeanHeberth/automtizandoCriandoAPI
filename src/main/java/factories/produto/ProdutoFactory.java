@@ -1,6 +1,6 @@
 package factories.produto;
 
-import models.request.ProdutoRequest;
+import models.request.produto.ProdutoRequest;
 
 import java.util.List;
 import java.util.Random;
