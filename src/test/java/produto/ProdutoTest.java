@@ -3,7 +3,7 @@ package produto;
 import base.BaseTest;
 import io.restassured.http.ContentType;
 
-import models.request.ProdutoRequest;
+import models.request.produto.ProdutoRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -79,6 +79,20 @@ public class ProdutoTest extends BaseTest {
                 .body("preco", notNullValue());
         
         logger.info("Teste concluído: buscarProdutoPorId");
+    }
+
+    @Test(description = "Deve retornar 404 ao buscar produto por id inexistente")
+    public void buscarProdutoPorIdInexistente() {
+        logger.info("Executando teste: Buscar Produto Por Id Inexistente");
+        given()
+                .contentType(ContentType.JSON)
+                .when()
+                .get(getEndpoint("produtos") + "/999999")
+                .then()
+                .statusCode(404)
+                .body("mensagem", containsString("Produto não encontrado"));
+
+        logger.info("Teste concluído: Buscar Produto Por Id Inexistente");
     }
 
     @Test(description = "Deve retornar 401 ao tentar criar um produto sem autenticação")
