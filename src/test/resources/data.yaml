@@ -3,6 +3,7 @@ api:
 
 
   endpoints:
+    health:   /actuator/health
     produtos: /produtos
     login:    /auth/login
     pedidos:  /pedidos
