@@ -7,3 +7,4 @@ api:
     produtos: /produtos
     login:    /auth/login
     pedidos:  /pedidos
+    usuarios: /usuarios

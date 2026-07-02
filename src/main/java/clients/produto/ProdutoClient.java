@@ -1,6 +1,5 @@
-package clients;
+package clients.produto;
 
-import factories.produto.ProdutoFactory;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import models.request.produto.AtualizarEstoqueRequest;
