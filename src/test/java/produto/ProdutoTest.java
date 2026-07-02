@@ -1,24 +1,19 @@
 package produto;
 
 import base.BaseTest;
-import clients.ProdutoClient;
-import factories.estoque.EstoqueFactory;
-import factories.produto.ProdutoFactory;
-import io.restassured.http.ContentType;
+import clients.produto.ProdutoClient;
 
-import io.restassured.response.Response;
-import models.request.produto.AtualizarEstoqueRequest;
 import models.request.produto.ProdutoRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import static config.Configuration.getEndpoint;
+import static constants.Ids.*;
 import static factories.estoque.EstoqueFactory.*;
 import static factories.produto.ProdutoFactory.*;
-import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 
+@Test(groups = "produtos")
 public class ProdutoTest extends BaseTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ProdutoTest.class);
@@ -36,7 +31,7 @@ public class ProdutoTest extends BaseTest {
         logger.info("Teste concluído: criarProdutoComSucesso");
     }
 
-    @Test
+    @Test(description = "Deve listar produtos com sucesso")
     public void listarProdutoComSucesso() {
 
         logger.info("Executando teste: listarProdutoComSucesso");
@@ -66,7 +61,7 @@ public class ProdutoTest extends BaseTest {
 
         logger.info("Executando teste: Buscar Produto Por Id Inexistente");
 
-        produtoClient.buscarProdutoPorId(999999999)
+        produtoClient.buscarProdutoPorId(ID_INEXISTENTE)
                 .then()
                 .statusCode(404)
                 .body("mensagem", containsString("Produto não encontrado"));
@@ -212,7 +207,7 @@ public class ProdutoTest extends BaseTest {
                 .atualizarEstoque(token, produtoId, estoqueValido())
                 .then()
                 .statusCode(200)
-                .body("estoque", equalTo(estoqueValido().getQuantidade()));
+                .body("estoque", equalTo(estoqueValido().getEstoque()));
 
         logger.info("Teste concluído: Estoque do produto com ID: " + produtoId + " atualizado com sucesso");
     }

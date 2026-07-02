@@ -1,66 +1,72 @@
 package auth;
 
-import static config.Configuration.getEndpoint;
-import static config.Environment.*;
-import static io.restassured.RestAssured.given;
-
+import config.Environment;
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import models.request.usuario.UsuarioRequest;
+
+import static config.Configuration.getEndpoint;
+import static config.Environment.getEmail;
+import static config.Environment.getSenha;
+import static io.restassured.RestAssured.given;
 
 public class AuthService {
 
-    private static final String CONTENT_TYPE = "application/json";
     private static final int SUCCESS_STATUS = 200;
     private static final String TOKEN_PATH = "token";
     private static String cachedToken;
 
+    private AuthService() {
+    }
+
     public static String getToken() {
-        if (cachedToken != null && !cachedToken.isEmpty()) {
+        if (cachedToken != null && !cachedToken.isBlank()) {
             return cachedToken;
         }
-        cachedToken = fetchToken(getEmail(), getSenha());
+
+        cachedToken = fetchTokenComBootstrap(getEmail(), getSenha());
         return cachedToken;
     }
 
     public static String getToken(String email, String password) {
         validateCredentials(email, password);
-        return fetchToken(email, password);
-    }
-
-    public static boolean login(String email, String password) {
-        validateCredentials(email, password);
-        try {
-            fetchToken(email, password);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+        return fetchTokenComBootstrap(email, password);
     }
 
     public static void clearCache() {
         cachedToken = null;
     }
 
-    private static String fetchToken(String email, String password) {
-        String body = buildLoginBody(email, password);
+    private static String fetchTokenComBootstrap(String email, String password) {
+        Response response = loginRequest(email, password);
 
-        Response response = given()
-                .contentType(CONTENT_TYPE)
-                .body(body)
-                .when()
-                .post(getEndpoint("login"))
+        if (response.statusCode() == 401 || response.statusCode() == 404) {
+            criarUsuarioPadrao();
+            response = loginRequest(email, password);
+        }
+
+        return response
                 .then()
                 .statusCode(SUCCESS_STATUS)
                 .extract()
-                .response();
+                .path(TOKEN_PATH);
+    }
 
-        return response.path(TOKEN_PATH);
+    private static Response loginRequest(String email, String password) {
+        validateCredentials(email, password);
+
+        return given()
+                .contentType(ContentType.JSON)
+                .body(buildLoginBody(email, password))
+                .when()
+                .post(getEndpoint("login"));
     }
 
     private static String buildLoginBody(String email, String password) {
         return """
                 {
-                    "email": "%s",
-                    "senha": "%s"
+                  "email": "%s",
+                  "senha": "%s"
                 }
                 """.formatted(email, password);
     }
@@ -69,8 +75,24 @@ public class AuthService {
         if (email == null || email.trim().isEmpty()) {
             throw new IllegalArgumentException("Email não pode ser vazio");
         }
+
         if (password == null || password.trim().isEmpty()) {
             throw new IllegalArgumentException("Senha não pode ser vazia");
         }
+    }
+
+    private static void criarUsuarioPadrao() {
+        UsuarioRequest usuario = new UsuarioRequest();
+        usuario.setNome("Usuário Automação");
+        usuario.setEmail(Environment.getEmail());
+        usuario.setSenha(Environment.getSenha());
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(usuario)
+                .when()
+                .post(getEndpoint("usuarios"))
+                .then()
+                .statusCode(201);
     }
 }

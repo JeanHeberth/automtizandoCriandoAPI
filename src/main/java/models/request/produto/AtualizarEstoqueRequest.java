@@ -8,5 +8,5 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class AtualizarEstoqueRequest {
-    private Integer quantidade;
+    private Integer estoque;
 }
