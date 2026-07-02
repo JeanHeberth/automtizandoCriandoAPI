@@ -1,14 +1,20 @@
 package produto;
 
 import base.BaseTest;
+import clients.ProdutoClient;
+import factories.estoque.EstoqueFactory;
+import factories.produto.ProdutoFactory;
 import io.restassured.http.ContentType;
 
+import io.restassured.response.Response;
+import models.request.produto.AtualizarEstoqueRequest;
 import models.request.produto.ProdutoRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import static config.Configuration.getEndpoint;
+import static factories.estoque.EstoqueFactory.*;
 import static factories.produto.ProdutoFactory.*;
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
@@ -16,20 +22,17 @@ import static org.hamcrest.Matchers.*;
 public class ProdutoTest extends BaseTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ProdutoTest.class);
+    private final ProdutoClient produtoClient = new ProdutoClient();
 
     @Test(description = "Deve criar um produto com sucesso")
     public void criarProdutoComSucesso() {
         logger.info("Executando teste: criarProdutoComSucesso");
 
-        ProdutoRequest produto = produtoValido();
-        given()
-                .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token)
-                .body(produto)
-                .when()
-                .post(getEndpoint("produtos"))
+        ProdutoRequest produtoRequest = produtoValido();
+        produtoClient.criarProduto(token, produtoRequest)
                 .then()
                 .statusCode(201);
+
         logger.info("Teste concluído: criarProdutoComSucesso");
     }
 
@@ -37,11 +40,7 @@ public class ProdutoTest extends BaseTest {
     public void listarProdutoComSucesso() {
 
         logger.info("Executando teste: listarProdutoComSucesso");
-
-        given()
-                .contentType(ContentType.JSON)
-                .when()
-                .get(getEndpoint("produtos"))
+        produtoClient.listarProdutos()
                 .then()
                 .statusCode(200);
 
@@ -52,42 +51,22 @@ public class ProdutoTest extends BaseTest {
     public void buscarProdutoPorId() {
 
         logger.info("Executando teste: buscarProdutoPorId");
-        ProdutoRequest produto = produtoValido();
-        
-        // Criar produto e capturar o ID
-        Integer produtoId = given()
-                .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token)
-                .body(produto)
-                .when()
-                .post(getEndpoint("produtos"))
+
+        Integer produtoId = produtoClient.criarProdutoERetornarId(token, produtoValido());
+        produtoClient.buscarProdutoPorId(produtoId)
                 .then()
-                .statusCode(201)
-                .extract()
-                .path("id");
-        
-        // Buscar produto pelo ID
-        given()
-                .contentType(ContentType.JSON)
-                .when()
-                .get(getEndpoint("produtos") + "/" + produtoId)
-                .then()
-                .statusCode(200)
-                .body("id", equalTo(produtoId))
-                .body("nome", notNullValue())
-                .body("descricao", notNullValue())
-                .body("preco", notNullValue());
-        
+                .statusCode(200);
+
         logger.info("Teste concluído: buscarProdutoPorId");
     }
 
+
     @Test(description = "Deve retornar 404 ao buscar produto por id inexistente")
     public void buscarProdutoPorIdInexistente() {
+
         logger.info("Executando teste: Buscar Produto Por Id Inexistente");
-        given()
-                .contentType(ContentType.JSON)
-                .when()
-                .get(getEndpoint("produtos") + "/999999")
+
+        produtoClient.buscarProdutoPorId(999999999)
                 .then()
                 .statusCode(404)
                 .body("mensagem", containsString("Produto não encontrado"));
@@ -98,13 +77,11 @@ public class ProdutoTest extends BaseTest {
     @Test(description = "Deve retornar 401 ao tentar criar um produto sem autenticação")
     public void criarProdutoSemAutenticacao() {
         logger.info("Executando teste: criarProdutoSemAutenticacao");
-        given()
-                .contentType(ContentType.JSON)
-                .body(produtoValido())
-                .when()
-                .post(getEndpoint("produtos"))
+
+        produtoClient.criarProdutoSemAutenticacao(produtoValido())
                 .then()
-                .statusCode(401);
+                .statusCode(401)
+                .body("error", containsString("Unauthorized"));
 
         logger.info("Teste concluído: criarProdutoSemAutenticacao");
     }
@@ -113,15 +90,7 @@ public class ProdutoTest extends BaseTest {
     public void criarProdutoComNomeVazio() {
         logger.info("Executando teste: Criar Produto Com Nome Vazio");
 
-        ProdutoRequest produto = produtoValido();
-        produto.setNome("");
-
-        given()
-                .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token)
-                .body(produto)
-                .when()
-                .post(getEndpoint("produtos"))
+        produtoClient.criarProduto(token, produtoComNomeVazio())
                 .then()
                 .statusCode(400)
                 .body("campos.mensagem", hasItem("Nome é obrigatório"));
@@ -133,15 +102,7 @@ public class ProdutoTest extends BaseTest {
     public void criarProdutoComCaractereMenorQueOPermitido() {
         logger.info("Executando teste: Criar Produto Com Caractere Menor Que O Permitido");
 
-        ProdutoRequest produto = produtoValido();
-        produto.setNome("a");
-
-        given()
-                .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token)
-                .body(produto)
-                .when()
-                .post(getEndpoint("produtos"))
+        produtoClient.criarProduto(token, produtoComNomeCaractereMenorQueOPermitido())
                 .then()
                 .statusCode(400)
                 .body("campos.mensagem", hasItem("Nome deve ter entre 2 e 150 caracteres"));
@@ -154,18 +115,11 @@ public class ProdutoTest extends BaseTest {
 
         logger.info("Executando teste: Criar Produto Sem Descricao");
 
-        ProdutoRequest produto = produtoValido();
-        produto.setDescricao("");
-
-        given()
-                .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token)
-                .body(produto)
-                .when()
-                .post(getEndpoint("produtos"))
+        produtoClient.criarProduto(token, produtoComDescricaoVazia())
                 .then()
                 .statusCode(400)
                 .body("campos.mensagem", hasItem("Descrição é obrigatória"));
+
 
         logger.info("Teste concluído: Criar Produto Sem Descricao");
     }
@@ -174,15 +128,7 @@ public class ProdutoTest extends BaseTest {
     public void criarProdutoComPrecoNegativo() {
 
         logger.info("Executando teste: Criar Produto Com Preço Negativo");
-        ProdutoRequest produto = produtoValido();
-        produto.setPreco(-10.0);
-
-        given()
-                .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token)
-                .body(produto)
-                .when()
-                .post(getEndpoint("produtos"))
+        produtoClient.criarProduto(token, produtoComPrecoNegativo())
                 .then()
                 .statusCode(400)
                 .body("campos.mensagem", hasItem("Preço deve ser maior que zero"));
@@ -195,15 +141,7 @@ public class ProdutoTest extends BaseTest {
 
         logger.info("Executando teste: Criar Produto Com Estoque Negativo");
 
-        ProdutoRequest produto = produtoValido();
-        produto.setEstoque(-5);
-
-        given()
-                .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token)
-                .body(produto)
-                .when()
-                .post(getEndpoint("produtos"))
+        produtoClient.criarProduto(token, produtoComEstoqueNegativo())
                 .then()
                 .statusCode(400)
                 .body("campos.mensagem", hasItem("Estoque não pode ser negativo"));
@@ -216,18 +154,10 @@ public class ProdutoTest extends BaseTest {
 
         logger.info("Executando teste: Criar Produto Com Categoria Inválida");
 
-        ProdutoRequest produto = produtoValido();
-
-        produto.setCategoria("TESTE");
-        given()
-                .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token)
-                .body(produto)
-                .when()
-                .post(getEndpoint("produtos"))
+        produtoClient.criarProduto(token, produtoComCategoriaInvalida())
                 .then()
                 .statusCode(400)
-                .body("mensagem", containsString("Valor 'TESTE' invalido."));
+                .body("mensagem", containsString("Valor 'TESTE' invalido"));
 
         logger.info("Teste concluído: Criar Produto Com Categoria Inválida");
     }
@@ -237,19 +167,53 @@ public class ProdutoTest extends BaseTest {
 
         logger.info("Executando teste: Criar Produto Com Categoria vazia");
 
-        ProdutoRequest produto = produtoValido();
-
-        produto.setCategoria("");
-        given()
-                .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token)
-                .body(produto)
-                .when()
-                .post(getEndpoint("produtos"))
+        produtoClient.criarProduto(token, produtoComCategoriaVazia())
                 .then()
                 .statusCode(400)
-                .body("mensagem", containsString("Valor '' invalido."));
+                .body("mensagem", containsString("Valor '' invalido"));
 
         logger.info("Teste concluído: Criar Produto Com Categoria vazia");
+    }
+
+    @Test(description = "Deve retornar 200 ao atualizar um produto cadastrado")
+    public void atualizarProduto() {
+
+        logger.info("Executando teste: atualizar Produto");
+
+        ProdutoRequest produtoRequest = produtoValido();
+
+        Integer produtoId = produtoClient.criarProdutoERetornarId(token, produtoRequest);
+
+        ProdutoRequest produtoRequestAtualizado = produtoValido();
+
+
+        produtoClient.atualizarProduto(token, produtoId, produtoRequestAtualizado)
+                .then()
+                .statusCode(200)
+                .body("nome", equalTo(produtoRequestAtualizado.getNome()))
+                .body("descricao", equalTo(produtoRequestAtualizado.getDescricao()))
+                .body("preco", equalTo(produtoRequestAtualizado.getPreco().floatValue()))
+                .body("estoque", equalTo(produtoRequestAtualizado.getEstoque()))
+                .body("categoria", equalTo(produtoRequestAtualizado.getCategoria()))
+        ;
+
+        logger.info("Teste concluído: Produto com ID: " + produtoId + " atualizado com sucesso");
+
+    }
+
+    @Test(description = "Deve retornar 200 ao atualizar o estoque de um produto cadastrado")
+    public void atualizarEstoqueProduto() {
+
+        logger.info("Executando teste: atualizarEstoqueProduto");
+
+        Integer produtoId = produtoClient.criarProdutoValido(token);
+
+        produtoClient
+                .atualizarEstoque(token, produtoId, estoqueValido())
+                .then()
+                .statusCode(200)
+                .body("estoque", equalTo(estoqueValido().getQuantidade()));
+
+        logger.info("Teste concluído: Estoque do produto com ID: " + produtoId + " atualizado com sucesso");
     }
 }
