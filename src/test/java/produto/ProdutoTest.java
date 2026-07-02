@@ -1,6 +1,5 @@
 package produto;
 
-import auth.AuthService;
 import base.BaseTest;
 import io.restassured.http.ContentType;
 
@@ -10,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import static config.Configuration.getEndpoint;
-import static factories.ProdutoFactory.*;
+import static factories.produto.ProdutoFactory.*;
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 
@@ -21,7 +20,6 @@ public class ProdutoTest extends BaseTest {
     @Test(description = "Deve criar um produto com sucesso")
     public void criarProdutoComSucesso() {
         logger.info("Executando teste: criarProdutoComSucesso");
-        String token = AuthService.getToken();
 
         ProdutoRequest produto = produtoValido();
         given()
@@ -37,6 +35,7 @@ public class ProdutoTest extends BaseTest {
 
     @Test
     public void listarProdutoComSucesso() {
+
         logger.info("Executando teste: listarProdutoComSucesso");
 
         given()
@@ -47,6 +46,39 @@ public class ProdutoTest extends BaseTest {
                 .statusCode(200);
 
         logger.info("Teste concluído: listarProdutoComSucesso");
+    }
+
+    @Test(description = "Deve retornar produto por id")
+    public void buscarProdutoPorId() {
+
+        logger.info("Executando teste: buscarProdutoPorId");
+        ProdutoRequest produto = produtoValido();
+        
+        // Criar produto e capturar o ID
+        Integer produtoId = given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
+                .body(produto)
+                .when()
+                .post(getEndpoint("produtos"))
+                .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+        
+        // Buscar produto pelo ID
+        given()
+                .contentType(ContentType.JSON)
+                .when()
+                .get(getEndpoint("produtos") + "/" + produtoId)
+                .then()
+                .statusCode(200)
+                .body("id", equalTo(produtoId))
+                .body("nome", notNullValue())
+                .body("descricao", notNullValue())
+                .body("preco", notNullValue());
+        
+        logger.info("Teste concluído: buscarProdutoPorId");
     }
 
     @Test(description = "Deve retornar 401 ao tentar criar um produto sem autenticação")
@@ -67,7 +99,6 @@ public class ProdutoTest extends BaseTest {
     public void criarProdutoComNomeVazio() {
         logger.info("Executando teste: Criar Produto Com Nome Vazio");
 
-        String token = AuthService.getToken();
         ProdutoRequest produto = produtoValido();
         produto.setNome("");
 
@@ -88,7 +119,6 @@ public class ProdutoTest extends BaseTest {
     public void criarProdutoComCaractereMenorQueOPermitido() {
         logger.info("Executando teste: Criar Produto Com Caractere Menor Que O Permitido");
 
-        String token = AuthService.getToken();
         ProdutoRequest produto = produtoValido();
         produto.setNome("a");
 
@@ -110,7 +140,6 @@ public class ProdutoTest extends BaseTest {
 
         logger.info("Executando teste: Criar Produto Sem Descricao");
 
-        String token = AuthService.getToken();
         ProdutoRequest produto = produtoValido();
         produto.setDescricao("");
 
@@ -129,8 +158,8 @@ public class ProdutoTest extends BaseTest {
 
     @Test(description = "Deve retornar 400 ao tentar criar um produto com preço negativo")
     public void criarProdutoComPrecoNegativo() {
+
         logger.info("Executando teste: Criar Produto Com Preço Negativo");
-        String token = AuthService.getToken();
         ProdutoRequest produto = produtoValido();
         produto.setPreco(-10.0);
 
@@ -149,8 +178,9 @@ public class ProdutoTest extends BaseTest {
 
     @Test(description = "Deve retornar 400 ao tentar criar um produto com estoque negativo")
     public void criarProdutoComEstoqueNegativo() {
+
         logger.info("Executando teste: Criar Produto Com Estoque Negativo");
-        String token = AuthService.getToken();
+
         ProdutoRequest produto = produtoValido();
         produto.setEstoque(-5);
 
@@ -169,9 +199,9 @@ public class ProdutoTest extends BaseTest {
 
     @Test(description = "Deve retornar 400 ao tentar criar um produto com categoria inválida")
     public void criarProdutoComCategoriaInvalida() {
+
         logger.info("Executando teste: Criar Produto Com Categoria Inválida");
 
-        String token = AuthService.getToken();
         ProdutoRequest produto = produtoValido();
 
         produto.setCategoria("TESTE");
@@ -190,9 +220,9 @@ public class ProdutoTest extends BaseTest {
 
     @Test(description = "Deve retornar 400 ao tentar criar um produto com categoria vazia")
     public void criarProdutoComCategoriaVazia() {
+
         logger.info("Executando teste: Criar Produto Com Categoria vazia");
 
-        String token = AuthService.getToken();
         ProdutoRequest produto = produtoValido();
 
         produto.setCategoria("");

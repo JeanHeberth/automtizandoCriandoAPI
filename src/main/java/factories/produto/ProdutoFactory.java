@@ -1,8 +1,7 @@
-package factories;
+package factories.produto;
 
 import models.request.ProdutoRequest;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
