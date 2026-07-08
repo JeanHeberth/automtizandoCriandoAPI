@@ -8,6 +8,7 @@ import org.testng.annotations.Test;
 import java.util.logging.Logger;
 
 import static constants.Ids.ID_INEXISTENTE;
+import static constants.Ids.NOME_INEXISTENTE;
 import static factories.usuario.UsuarioFactory.*;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
@@ -178,5 +179,15 @@ public class UsuarioTest extends BaseTest {
         logger.info("Busca de usuário por nome " + usuario.getNome() + " realizada com sucesso");
     }
 
+    @Test(description = "Deve falhar ao buscar usuário por nome inexistente")
+    public void testBuscarUsuarioPorNomeInexistente() {
+        logger.info("Executando teste de busca de usuário por nome inexistente");
+        usuarioClient.buscarUsuarioPorNomeInexistente(token, NOME_INEXISTENTE)
+                .then()
+                .statusCode(404)
+                .body("mensagem", containsString("Nenhum usuario encontrado com nome: " + NOME_INEXISTENTE));
+
+        logger.info("Falha ao buscar usuário por nome inexistente");
+    }
 
 }

@@ -64,4 +64,11 @@ public class UsuarioClient {
     }
 
 
+    public Response buscarUsuarioPorNomeInexistente(String token, String nomeInexistente) {
+        return given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get(USUARIOS.getUrl() + "/" + "buscar?nome=" + nomeInexistente);
+    }
 }
