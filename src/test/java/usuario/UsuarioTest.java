@@ -7,7 +7,10 @@ import org.testng.annotations.Test;
 
 import java.util.logging.Logger;
 
+import static constants.Ids.ID_INEXISTENTE;
+import static constants.Ids.NOME_INEXISTENTE;
 import static factories.usuario.UsuarioFactory.*;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 
 public class UsuarioTest extends BaseTest {
@@ -99,6 +102,92 @@ public class UsuarioTest extends BaseTest {
                 .body("campos.mensagem", hasItem("Senha deve ter no mínimo 6 caracteres"));
 
         logger.info("Falha ao criar usuário com senha com menos de 6 caracteres: " + usuarioComSenhaComCaractereMenorQueOPermitido().getSenha());
+    }
+
+    @Test(description = "Deve retornar 200 ao listar todos os usuários")
+    public void testListarTodosUsuarios() {
+        logger.info("Executando teste de listagem de todos os usuários");
+
+        usuarioClient.listarUsuarios(token)
+                .then()
+                .statusCode(200);
+
+        logger.info("Listagem de usuários realizada com sucesso");
+    }
+
+    @Test(description = "Deve falhar ao listar usuários com token inválido")
+    public void testListarUsuariosComTokenInvalido() {
+        logger.info("Executando teste de listagem de usuários com token inválido");
+
+        usuarioClient.listarUsuarios("token_invalido")
+                .then()
+                .statusCode(401)
+                .body("error", containsString("Unauthorized"));
+
+        logger.info("Falha ao listar usuários com token inválido");
+    }
+
+    @Test(description = "Deve falhar ao listar usuários sem token")
+    public void testListarUsuariosSemToken() {
+        logger.info("Executando teste de listagem de usuários sem token");
+        usuarioClient.listarUsuarios(null)
+                .then()
+                .statusCode(401)
+                .body("error", containsString("Unauthorized"));
+
+        logger.info("Falha ao listar usuários sem token");
+    }
+
+    @Test(description = "Deve retornar 200 ao buscar usuario por id")
+    public void testBuscarUsuarioPorId() {
+        logger.info("Executando teste de busca de usuário por ID");
+
+        Integer usuarioId = usuarioClient.criarUsuarioERetornarId(usuarioValido());
+        usuarioClient.buscarUsuarioPorId(token, usuarioId)
+                .then()
+                .statusCode(200);
+
+        logger.info("Busca de usuário " + usuarioId + " realizada com sucesso");
+    }
+
+    @Test(description = "Deve falhar ao buscar usuario por id inexistente")
+    public void testBuscarUsuarioPorIdInexistente() {
+        logger.info("Executando teste de busca de usuário por ID inexistente");
+        usuarioClient.buscarUsuarioPorId(token, ID_INEXISTENTE)
+                .then()
+                .statusCode(404)
+                .body("mensagem", containsString("Usuario nao encontrado com id: " + ID_INEXISTENTE));
+
+        logger.info("Falha ao buscar usuário " + ID_INEXISTENTE + " inexistente");
+    }
+
+    @Test(description = "Deve retornar 200 ao buscar um usuario por nome")
+    public void testBuscarUsuarioPorNome() {
+        logger.info("Executando teste de busca de usuário por nome");
+
+        UsuarioRequest usuario = usuarioValido();
+
+        usuarioClient.criarUsuarioERetornarPorNome(usuario)
+                .then()
+                .statusCode(201);
+
+        usuarioClient.buscarUsuarioPorNome(token, usuario.getNome())
+                .then()
+                .statusCode(200)
+                .body("nome", hasItem(usuario.getNome()));
+
+        logger.info("Busca de usuário por nome " + usuario.getNome() + " realizada com sucesso");
+    }
+
+    @Test(description = "Deve falhar ao buscar usuário por nome inexistente")
+    public void testBuscarUsuarioPorNomeInexistente() {
+        logger.info("Executando teste de busca de usuário por nome inexistente");
+        usuarioClient.buscarUsuarioPorNomeInexistente(token, NOME_INEXISTENTE)
+                .then()
+                .statusCode(404)
+                .body("mensagem", containsString("Nenhum usuario encontrado com nome: " + NOME_INEXISTENTE));
+
+        logger.info("Falha ao buscar usuário por nome inexistente");
     }
 
 }

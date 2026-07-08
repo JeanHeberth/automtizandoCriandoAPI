@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import static constants.Ids.*;
+import static constants.Ids.ID_INEXISTENTE;
 import static factories.estoque.EstoqueFactory.*;
 import static factories.produto.ProdutoFactory.*;
 import static org.hamcrest.Matchers.*;
@@ -64,7 +64,7 @@ public class ProdutoTest extends BaseTest {
         produtoClient.buscarProdutoPorId(ID_INEXISTENTE)
                 .then()
                 .statusCode(404)
-                .body("mensagem", containsString("Produto não encontrado"));
+                .body("mensagem", containsString("Produto não encontrado com id: " + ID_INEXISTENTE));
 
         logger.info("Teste concluído: Buscar Produto Por Id Inexistente");
     }
