@@ -1,46 +1,96 @@
 package pedido;
 
 import base.BaseTest;
-import constants.endpoints.Endpoint;
+import clients.produto.PedidoClient;
+import clients.produto.ProdutoClient;
 import factories.pedido.PedidoFactory;
 import factories.produto.ProdutoFactory;
 import models.request.pedido.PedidoRequest;
 import models.request.produto.ProdutoRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import static config.Configuration.getEndpoint;
-import static constants.endpoints.Endpoint.*;
-import static io.restassured.RestAssured.given;
+import static factories.pedido.PedidoFactory.*;
 
 public class PedidoTest extends BaseTest {
 
-    @Test(description = "Deve criar um pedido com sucesso")
+    private static final Logger logger = LoggerFactory.getLogger(PedidoTest.class);
+    private final PedidoClient pedidoClient = new PedidoClient();
+
+
+    @Test(description = "Deve criar um pedido com sucesso e validar o status do pedido")
     public void criarPedidoComSucesso() {
 
-        ProdutoRequest produto = ProdutoFactory.produtoValido();
+        logger.info("Executando teste: criarPedidoComSucesso");
 
-        Integer produtoId =
-                given()
-                        .contentType("application/json")
-                        .header("Authorization", "Bearer " + token)
-                        .body(produto)
-                        .when()
-                        .post(PRODUTOS.getUrl())
-                        .then()
-                        .statusCode(201)
-                        .extract()
-                        .path("id");
+        Integer produtoId = new ProdutoClient().criarProdutoERetornarId(token,
+                ProdutoFactory.produtoValido()
+        );
 
-        PedidoRequest pedido = PedidoFactory.pedidoValido(produtoId);
+        PedidoRequest pedidoRequest = pedidoValido(produtoId);
 
-        given()
-                .contentType("application/json")
-                .header("Authorization", "Bearer " + token)
-                .body(pedido)
-                .when()
-                .post(PEDIDOS.getUrl())
+        Integer pedidoId = pedidoClient.criarPedidoERetornarId(token,
+                pedidoRequest
+        );
+
+        pedidoClient.buscarPedidoPorId(token, pedidoId)
                 .then()
-                .statusCode(201);
+                .statusCode(200);
+
+        logger.info("Teste concluído: criarPedidoComSucesso");
+
     }
+
+    @Test(description = "Deve listar os pedidos com sucesso")
+    public void listarPedidosComSucesso() {
+
+        logger.info("Executando teste: listarPedidosComSucesso");
+
+        pedidoClient.listarPedidos(token)
+                .then()
+                .statusCode(200);
+
+        logger.info("Teste concluído: listarPedidosComSucesso");
+    }
+
+    @Test(description = "Deve buscar um pedido por ID com sucesso")
+    public void buscarPedidoPorIdComSucesso() {
+
+        logger.info("Executando teste: buscarPedidoPorIdComSucesso");
+
+        Integer produtoId = new ProdutoClient().criarProdutoERetornarId(token,
+                ProdutoFactory.produtoValido()
+        );
+
+        PedidoRequest pedidoRequest = pedidoValido(produtoId);
+
+        Integer pedidoId = pedidoClient.criarPedidoERetornarId(token,
+                pedidoRequest
+        );
+
+        pedidoClient.buscarPedidoPorId(token, pedidoId)
+                .then()
+                .statusCode(200);
+
+        logger.info("Teste concluído: buscarPedidoPorIdComSucesso");
+    }
+
+    @Test(description = "Deve validar a criação de um pedido com a quantidade vazia")
+    public void criarPedidoComQuantidadeVazia() {
+
+        logger.info("Executando teste: criarPedidoComQuantidadeVazia");
+
+        Integer produtoId = new ProdutoClient().criarProdutoERetornarId(token,
+                ProdutoFactory.produtoValido()
+        );
+        PedidoRequest pedidoRequest = pedidoComQuantidadeVazia(produtoId);
+        pedidoClient.criarPedido(token, pedidoRequest)
+                .then()
+                .statusCode(400);
+
+        logger.info("Teste concluído: criarPedidoComQuantidadeVazia");
+    }
+
 
 }
