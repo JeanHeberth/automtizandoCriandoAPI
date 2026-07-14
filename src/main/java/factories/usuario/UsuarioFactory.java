@@ -1,11 +1,7 @@
 package factories.usuario;
 
 import models.request.usuario.UsuarioRequest;
-import utils.RandomUtils;
-
-import java.util.UUID;
-
-import static utils.RandomUtils.*;
+import static utils.RandomUtils.unique;
 
 public class UsuarioFactory {
 

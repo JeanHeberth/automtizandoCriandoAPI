@@ -1,16 +1,10 @@
 package clients.usuario;
 
-import constants.endpoints.Endpoint;
-import factories.usuario.UsuarioFactory;
+import static constants.endpoints.Endpoint.USUARIOS;
+import static io.restassured.RestAssured.given;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import models.request.usuario.UsuarioRequest;
-import org.hamcrest.Condition;
-
-import static config.Configuration.getEndpoint;
-import static constants.endpoints.Endpoint.*;
-import static factories.usuario.UsuarioFactory.*;
-import static io.restassured.RestAssured.given;
 
 public class UsuarioClient {
 

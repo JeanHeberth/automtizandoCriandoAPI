@@ -1,11 +1,12 @@
 package factories.produto;
 
-import models.request.produto.ProdutoRequest;
-
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+
+import models.request.produto.ProdutoRequest;
 
 public class ProdutoFactory {
 
@@ -25,7 +26,7 @@ public class ProdutoFactory {
         ProdutoRequest produto = new ProdutoRequest();
         produto.setNome("Produto " + UUID.randomUUID());
         produto.setDescricao("Descrição do produto " + UUID.randomUUID());
-        produto.setPreco(BigDecimal.valueOf(random.nextDouble() * 100).setScale(2, BigDecimal.ROUND_HALF_UP));
+        produto.setPreco(BigDecimal.valueOf(random.nextDouble() * 100).setScale(2, RoundingMode.HALF_UP));
         produto.setEstoque(random.nextInt(100));
         produto.setCategoria(CATEGORIAS.get(random.nextInt(CATEGORIAS.size())));
         return produto;

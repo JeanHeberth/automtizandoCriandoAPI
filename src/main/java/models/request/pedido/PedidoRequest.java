@@ -9,5 +9,7 @@ import java.util.List;
 @Setter
 public class PedidoRequest {
 
+    private Integer produtoId;
+    private Integer quantidade;
     private List<ItemPedidoRequest> itens;
 }

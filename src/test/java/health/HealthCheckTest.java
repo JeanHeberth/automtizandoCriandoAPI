@@ -1,15 +1,13 @@
 package health;
 
-import base.BaseTest;
-import constants.endpoints.Endpoint;
-import org.testng.annotations.Test;
-
 import java.util.logging.Logger;
 
-import static config.Configuration.getEndpoint;
-import static constants.endpoints.Endpoint.*;
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import org.testng.annotations.Test;
+
+import base.BaseTest;
+import static constants.endpoints.Endpoint.HEALTH_CHECK;
+import static io.restassured.RestAssured.given;
 
 public class HealthCheckTest extends BaseTest {
 

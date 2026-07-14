@@ -1,9 +1,9 @@
 package config;
 
-import org.yaml.snakeyaml.Yaml;
-
 import java.io.InputStream;
 import java.util.Map;
+
+import org.yaml.snakeyaml.Yaml;
 
 public class Configuration {
     private static final Map<String, Object> config;
@@ -27,7 +27,6 @@ public class Configuration {
         return (Map<String, Object>) config.get(section);
     }
 
-    @SuppressWarnings("unchecked")
     public static String getBaseUri(){
         return (String) getSection("api")
                 .get("baseUri");
