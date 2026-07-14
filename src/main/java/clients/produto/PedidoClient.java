@@ -1,6 +1,7 @@
 package clients.produto;
 
 import constants.endpoints.Endpoint;
+import static factories.pedido.PedidoFactory.pedidoValido;
 import static io.restassured.RestAssured.given;
 import io.restassured.response.Response;
 import models.request.pedido.PedidoRequest;
@@ -78,6 +79,10 @@ public class PedidoClient {
                 .statusCode(201)
                 .extract()
                 .path("id");
+    }
+
+    public Integer criarPedidoValido(String token, Integer produtoId) {
+        return criarPedidoERetornarId(token, pedidoValido(produtoId));
     }
 
     public Response atualizarPedido(String token, Integer pedidoId, PedidoRequest pedido) {

@@ -1,17 +1,25 @@
 package produto;
 
-import base.BaseTest;
-import clients.produto.ProdutoClient;
-
-import models.request.produto.ProdutoRequest;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import base.BaseTest;
+import clients.produto.ProdutoClient;
 import static constants.Ids.ID_INEXISTENTE;
-import static factories.estoque.EstoqueFactory.*;
-import static factories.produto.ProdutoFactory.*;
-import static org.hamcrest.Matchers.*;
+import static factories.estoque.EstoqueFactory.estoqueValido;
+import static factories.produto.ProdutoFactory.produtoComCategoriaInvalida;
+import static factories.produto.ProdutoFactory.produtoComCategoriaVazia;
+import static factories.produto.ProdutoFactory.produtoComDescricaoVazia;
+import static factories.produto.ProdutoFactory.produtoComEstoqueNegativo;
+import static factories.produto.ProdutoFactory.produtoComNomeCaractereMenorQueOPermitido;
+import static factories.produto.ProdutoFactory.produtoComNomeVazio;
+import static factories.produto.ProdutoFactory.produtoComPrecoNegativo;
+import static factories.produto.ProdutoFactory.produtoValido;
+import models.request.produto.ProdutoRequest;
 
 @Test(groups = "produtos")
 public class ProdutoTest extends BaseTest {

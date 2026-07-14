@@ -3,6 +3,7 @@ package factories.pedido;
 import java.util.Collections;
 import java.util.List;
 
+import static constants.Ids.ID_INEXISTENTE;
 import models.request.pedido.ItemPedidoRequest;
 import models.request.pedido.PedidoRequest;
 
@@ -19,7 +20,7 @@ public class PedidoFactory {
         return pedido;
     }
 
-    public static PedidoRequest pedidoComQuantidadeVazia(Integer produtoId) {
+    public static PedidoRequest pedidoComQuantidadeZero(Integer produtoId) {
         ItemPedidoRequest item = new ItemPedidoRequest();
         item.setProdutoId(produtoId);
         item.setQuantidade(0);
@@ -47,7 +48,7 @@ public class PedidoFactory {
 
     public static PedidoRequest pedidoComProdutoIdInexistente() {
         ItemPedidoRequest item = new ItemPedidoRequest();
-        item.setProdutoId(999999);
+        item.setProdutoId(ID_INEXISTENTE);
         item.setQuantidade(1);
 
         PedidoRequest pedido = new PedidoRequest();
