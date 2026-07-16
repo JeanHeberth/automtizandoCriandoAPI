@@ -41,6 +41,38 @@ public class UsuarioClient {
                 .get(USUARIOS.getUrl() + "/" + usuarioId);
     }
 
+    public Response atualizarUsuario(String token, Integer usuarioId, UsuarioRequest usuario) {
+        return given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
+                .body(usuario)
+                .when()
+                .put(USUARIOS.getUrl() + "/" + usuarioId);
+    }
+
+    public Response atualizarUsuarioSemToken(Integer usuarioId, UsuarioRequest usuario) {
+        return given()
+                .contentType(ContentType.JSON)
+                .body(usuario)
+                .when()
+                .put(USUARIOS.getUrl() + "/" + usuarioId);
+    }
+
+    public Response deletarUsuario(String token, Integer usuarioId) {
+        return given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .delete(USUARIOS.getUrl() + "/" + usuarioId);
+    }
+
+    public Response deletarUsuarioSemToken(Integer usuarioId) {
+        return given()
+                .contentType(ContentType.JSON)
+                .when()
+                .delete(USUARIOS.getUrl() + "/" + usuarioId);
+    }
+
     public Integer criarUsuarioERetornarId(UsuarioRequest usuario) {
         return criarUsuario(usuario)
                 .then()

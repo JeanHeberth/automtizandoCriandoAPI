@@ -18,6 +18,7 @@ import static factories.produto.ProdutoFactory.produtoComEstoqueNegativo;
 import static factories.produto.ProdutoFactory.produtoComNomeCaractereMenorQueOPermitido;
 import static factories.produto.ProdutoFactory.produtoComNomeVazio;
 import static factories.produto.ProdutoFactory.produtoComPrecoNegativo;
+import static factories.produto.ProdutoFactory.produtoValidoComCategoria;
 import static factories.produto.ProdutoFactory.produtoValido;
 import models.request.produto.ProdutoRequest;
 
@@ -48,6 +49,36 @@ public class ProdutoTest extends BaseTest {
                 .statusCode(200);
 
         logger.info("Teste concluído: listarProdutoComSucesso");
+    }
+
+    @Test(description = "Deve listar produtos por nome com sucesso")
+    public void listarProdutosPorNomeComSucesso() {
+        logger.info("Executando teste: listarProdutosPorNomeComSucesso");
+
+        ProdutoRequest produto = produtoValido();
+        produtoClient.criarProdutoERetornarId(token, produto);
+
+        produtoClient.listarProdutosPorNome(produto.getNome(), 0, 5, "nome,asc")
+                .then()
+                .statusCode(200)
+                .body("content.nome", hasItem(produto.getNome()));
+
+        logger.info("Teste concluído: listarProdutosPorNomeComSucesso");
+    }
+
+    @Test(description = "Deve listar produtos por categoria com sucesso")
+    public void listarProdutosPorCategoriaComSucesso() {
+        logger.info("Executando teste: listarProdutosPorCategoriaComSucesso");
+
+        ProdutoRequest produto = produtoValidoComCategoria("ELETRONICO");
+        produtoClient.criarProdutoERetornarId(token, produto);
+
+        produtoClient.listarProdutosPorCategoria("ELETRONICO", 0, 100, "nome,asc")
+                .then()
+                .statusCode(200)
+                .body("content.nome", hasItem(produto.getNome()));
+
+        logger.info("Teste concluído: listarProdutosPorCategoriaComSucesso");
     }
 
     @Test(description = "Deve retornar produto por id")
@@ -197,8 +228,7 @@ public class ProdutoTest extends BaseTest {
                 .body("descricao", equalTo(produtoRequestAtualizado.getDescricao()))
                 .body("preco", equalTo(produtoRequestAtualizado.getPreco().floatValue()))
                 .body("estoque", equalTo(produtoRequestAtualizado.getEstoque()))
-                .body("categoria", equalTo(produtoRequestAtualizado.getCategoria()))
-        ;
+                .body("categoria", equalTo(produtoRequestAtualizado.getCategoria()));
 
         logger.info("Teste concluído: Produto com ID: " + produtoId + " atualizado com sucesso");
 
@@ -218,5 +248,32 @@ public class ProdutoTest extends BaseTest {
                 .body("estoque", equalTo(estoqueValido().getEstoque()));
 
         logger.info("Teste concluído: Estoque do produto com ID: " + produtoId + " atualizado com sucesso");
+    }
+
+    @Test(description = "Deve retornar 204 ao deletar um produto cadastrado")
+    public void deletarProdutoComSucesso() {
+        logger.info("Executando teste: deletarProdutoComSucesso");
+
+        Integer produtoId = produtoClient.criarProdutoValido(token);
+
+        produtoClient.deletarProduto(token, produtoId)
+                .then()
+                .statusCode(204);
+
+        logger.info("Teste concluído: deletarProdutoComSucesso");
+    }
+
+    @Test(description = "Deve retornar 401 ao deletar um produto sem autenticação")
+    public void deletarProdutoSemAutenticacao() {
+        logger.info("Executando teste: deletarProdutoSemAutenticacao");
+
+        Integer produtoId = produtoClient.criarProdutoValido(token);
+
+        produtoClient.deletarProdutoSemAutenticacao(produtoId)
+                .then()
+                .statusCode(401)
+                .body("error", containsString("Unauthorized"));
+
+        logger.info("Teste concluído: deletarProdutoSemAutenticacao");
     }
 }

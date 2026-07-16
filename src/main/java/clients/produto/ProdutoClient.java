@@ -28,7 +28,6 @@ public class ProdutoClient {
         return given()
                 .contentType(ContentType.JSON)
                 .body(produto)
-                .body(produto)
                 .when()
                 .post(PRODUTOS.getUrl());
     }
@@ -38,6 +37,27 @@ public class ProdutoClient {
                 .contentType(ContentType.JSON)
                 .when()
                 .get(PRODUTOS.getUrl());
+    }
+
+    public Response listarProdutosPorNome(String nome, Integer page, Integer size, String sort) {
+        return given()
+                .contentType(ContentType.JSON)
+                .queryParam("nome", nome)
+                .queryParam("page", page)
+                .queryParam("size", size)
+                .queryParam("sort", sort)
+                .when()
+                .get(PRODUTOS.getUrl());
+    }
+
+    public Response listarProdutosPorCategoria(String categoria, Integer page, Integer size, String sort) {
+        return given()
+                .contentType(ContentType.JSON)
+                .queryParam("page", page)
+                .queryParam("size", size)
+                .queryParam("sort", sort)
+                .when()
+                .get(PRODUTOS.getUrl() + "/categoria/" + categoria);
     }
 
     public Response buscarProdutoPorId(Integer produtoId) {
@@ -78,6 +98,13 @@ public class ProdutoClient {
         return given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + token)
+                .when()
+                .delete(PRODUTOS.getUrl() + "/" + produtoId);
+    }
+
+    public Response deletarProdutoSemAutenticacao(Integer produtoId) {
+        return given()
+                .contentType(ContentType.JSON)
                 .when()
                 .delete(PRODUTOS.getUrl() + "/" + produtoId);
     }
