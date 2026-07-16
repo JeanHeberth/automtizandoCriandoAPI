@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "swagger-criando-api": {
+      "command": "/opt/homebrew/bin/uvx",
+      "args": [
+        "awslabs.openapi-mcp-server@latest"
+      ],
+      "env": {
+        "API_NAME": "criando-api",
+        "API_BASE_URL": "http://100.83.72.100:9999/criandoAPI",
+        "API_SPEC_URL": "http://100.83.72.100:9999/criandoAPI/v1/api-docs",
+        "ALLOW_INSECURE_HTTP": "true",
+        "ALLOW_PRIVATE_NETWORKS": "true",
+        "LOG_LEVEL": "DEBUG"
+      }
+    }
+  }
+}

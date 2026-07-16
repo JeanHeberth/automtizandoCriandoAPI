@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum Endpoint {
 
     LOGIN("/auth/login"),
+    REGISTRO("/auth/registro"),
     USUARIOS("/usuarios"),
     PRODUTOS("/produtos"),
     PEDIDOS("/pedidos"),

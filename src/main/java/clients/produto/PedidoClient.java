@@ -5,6 +5,7 @@ import static factories.pedido.PedidoFactory.pedidoValido;
 import static io.restassured.RestAssured.given;
 import io.restassured.response.Response;
 import models.request.pedido.PedidoRequest;
+import models.request.pedido.StatusPedidoRequest;
 
 public class PedidoClient {
 
@@ -66,6 +67,23 @@ public class PedidoClient {
                 .get(Endpoint.PEDIDOS.getUrl());
     }
 
+    public Response listarPedidosComStatus(String token, String status) {
+        return given()
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + token)
+                .queryParam("status", status)
+                .when()
+                .get(Endpoint.PEDIDOS.getUrl());
+    }
+
+    public Response listarPedidosComStatusSemToken(String status) {
+        return given()
+                .contentType("application/json")
+                .queryParam("status", status)
+                .when()
+                .get(Endpoint.PEDIDOS.getUrl());
+    }
+
     public Response listarPedidosSemToken() {
         return given()
                 .contentType("application/json")
@@ -115,5 +133,22 @@ public class PedidoClient {
                 .contentType("application/json")
                 .when()
                 .delete(Endpoint.PEDIDOS.byId(pedidoId));
+    }
+
+    public Response transicionarStatus(String token, Integer pedidoId, String status) {
+        return given()
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + token)
+                .body(new StatusPedidoRequest(status))
+                .when()
+                .patch(Endpoint.PEDIDOS.getUrl() + "/" + pedidoId + "/status");
+    }
+
+    public Response transicionarStatusSemToken(Integer pedidoId, String status) {
+        return given()
+                .contentType("application/json")
+                .body(new StatusPedidoRequest(status))
+                .when()
+                .patch(Endpoint.PEDIDOS.getUrl() + "/" + pedidoId + "/status");
     }
 }

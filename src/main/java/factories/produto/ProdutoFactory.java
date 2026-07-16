@@ -32,6 +32,12 @@ public class ProdutoFactory {
         return produto;
     }
 
+    public static ProdutoRequest produtoValidoComCategoria(String categoria) {
+        ProdutoRequest produto = produtoValido();
+        produto.setCategoria(categoria);
+        return produto;
+    }
+
     public static ProdutoRequest produtoComEstoqueNegativo() {
         ProdutoRequest produto = produtoValido();
         produto.setEstoque(-1);

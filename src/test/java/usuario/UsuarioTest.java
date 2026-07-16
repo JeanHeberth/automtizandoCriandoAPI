@@ -11,6 +11,7 @@ import static constants.Ids.ID_INEXISTENTE;
 import static constants.Ids.NOME_INEXISTENTE;
 import static factories.usuario.UsuarioFactory.*;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 
 public class UsuarioTest extends BaseTest {
@@ -30,6 +31,22 @@ public class UsuarioTest extends BaseTest {
                 .statusCode(201);
 
         logger.info("Usuário criado: " + usuario.getNome());
+    }
+
+    @Test(description = "Deve falhar ao criar um usuário com email duplicado")
+    public void testCriarUsuarioComEmailDuplicado() {
+        logger.info("Executando teste de criação de usuário com email duplicado");
+
+        UsuarioRequest usuario = usuarioValido();
+        usuarioClient.criarUsuario(usuario)
+                .then()
+                .statusCode(201);
+
+        usuarioClient.criarUsuario(usuario)
+                .then()
+                .statusCode(409);
+
+        logger.info("Falha ao criar usuário com email duplicado: " + usuario.getEmail());
     }
 
     @Test(description = "Deve falhar ao criar um usuário com nome vazio")
@@ -188,6 +205,151 @@ public class UsuarioTest extends BaseTest {
                 .body("mensagem", containsString("Nenhum usuario encontrado com nome: " + NOME_INEXISTENTE));
 
         logger.info("Falha ao buscar usuário por nome inexistente");
+    }
+
+    @Test(description = "Deve retornar 200 ao atualizar usuario cadastrado")
+    public void testAtualizarUsuario() {
+        logger.info("Executando teste de atualização de usuário");
+
+        Integer usuarioId = usuarioClient.criarUsuarioERetornarId(usuarioValido());
+        UsuarioRequest usuarioAtualizado = usuarioValido();
+
+        usuarioClient.atualizarUsuario(token, usuarioId, usuarioAtualizado)
+                .then()
+                .statusCode(200)
+                .body("nome", equalTo(usuarioAtualizado.getNome()))
+                .body("email", equalTo(usuarioAtualizado.getEmail()));
+
+        logger.info("Atualização de usuário " + usuarioId + " realizada com sucesso");
+    }
+
+    @Test(description = "Deve falhar ao atualizar usuário com nome vazio")
+    public void testAtualizarUsuarioComNomeVazio() {
+        logger.info("Executando teste de atualização de usuário com nome vazio");
+
+        Integer usuarioId = usuarioClient.criarUsuarioERetornarId(usuarioValido());
+
+        usuarioClient.atualizarUsuario(token, usuarioId, usuarioNomeVazio())
+                .then()
+                .statusCode(400);
+
+        logger.info("Falha ao atualizar usuário com nome vazio");
+    }
+
+    @Test(description = "Deve falhar ao atualizar usuário com email inválido")
+    public void testAtualizarUsuarioComEmailInvalido() {
+        logger.info("Executando teste de atualização de usuário com email inválido");
+
+        Integer usuarioId = usuarioClient.criarUsuarioERetornarId(usuarioValido());
+
+        usuarioClient.atualizarUsuario(token, usuarioId, usuarioComEmailInvalido())
+                .then()
+                .statusCode(400);
+
+        logger.info("Falha ao atualizar usuário com email inválido");
+    }
+
+    @Test(description = "Deve falhar ao atualizar usuário com senha vazia")
+    public void testAtualizarUsuarioComSenhaVazia() {
+        logger.info("Executando teste de atualização de usuário com senha vazia");
+
+        Integer usuarioId = usuarioClient.criarUsuarioERetornarId(usuarioValido());
+
+        usuarioClient.atualizarUsuario(token, usuarioId, usuarioComSenhaVazia())
+                .then()
+                .statusCode(400);
+
+        logger.info("Falha ao atualizar usuário com senha vazia");
+    }
+
+    @Test(description = "Deve retornar 409 ao atualizar usuário com email duplicado")
+    public void testAtualizarUsuarioComEmailDuplicado() {
+        logger.info("Executando teste de atualização de usuário com email duplicado");
+
+        UsuarioRequest usuario1 = usuarioValido();
+        UsuarioRequest usuario2 = usuarioValido();
+
+        Integer usuarioId1 = usuarioClient.criarUsuarioERetornarId(usuario1);
+        usuarioClient.criarUsuario(usuario2)
+                .then()
+                .statusCode(201);
+
+        usuario1.setEmail(usuario2.getEmail());
+
+        usuarioClient.atualizarUsuario(token, usuarioId1, usuario1)
+                .then()
+                .statusCode(409);
+
+        logger.info("Falha ao atualizar usuário com email duplicado");
+    }
+
+    @Test(description = "Deve retornar 404 ao atualizar usuario inexistente")
+    public void testAtualizarUsuarioInexistente() {
+        logger.info("Executando teste de atualização de usuário inexistente");
+
+        usuarioClient.atualizarUsuario(token, ID_INEXISTENTE, usuarioValido())
+                .then()
+                .statusCode(404)
+                .body("mensagem", containsString("Usuario nao encontrado com id: " + ID_INEXISTENTE));
+
+        logger.info("Falha ao atualizar usuário inexistente");
+    }
+
+    @Test(description = "Deve retornar 401 ao atualizar usuario sem token")
+    public void testAtualizarUsuarioSemToken() {
+        logger.info("Executando teste de atualização de usuário sem token");
+
+        Integer usuarioId = usuarioClient.criarUsuarioERetornarId(usuarioValido());
+
+        usuarioClient.atualizarUsuarioSemToken(usuarioId, usuarioValido())
+                .then()
+                .statusCode(401)
+                .body("error", containsString("Unauthorized"));
+
+        logger.info("Falha ao atualizar usuário sem token");
+    }
+
+    @Test(description = "Deve retornar 204 ao deletar usuario cadastrado")
+    public void testDeletarUsuario() {
+        logger.info("Executando teste de exclusão de usuário");
+
+        Integer usuarioId = usuarioClient.criarUsuarioERetornarId(usuarioValido());
+
+        usuarioClient.deletarUsuario(token, usuarioId)
+                .then()
+                .statusCode(204);
+
+        usuarioClient.buscarUsuarioPorId(token, usuarioId)
+                .then()
+                .statusCode(404);
+
+        logger.info("Exclusão de usuário " + usuarioId + " realizada com sucesso");
+    }
+
+    @Test(description = "Deve retornar 404 ao deletar usuario inexistente")
+    public void testDeletarUsuarioInexistente() {
+        logger.info("Executando teste de exclusão de usuário inexistente");
+
+        usuarioClient.deletarUsuario(token, ID_INEXISTENTE)
+                .then()
+                .statusCode(404)
+                .body("mensagem", containsString("Usuario nao encontrado com id: " + ID_INEXISTENTE));
+
+        logger.info("Falha ao deletar usuário inexistente");
+    }
+
+    @Test(description = "Deve retornar 401 ao deletar usuario sem token")
+    public void testDeletarUsuarioSemToken() {
+        logger.info("Executando teste de exclusão de usuário sem token");
+
+        Integer usuarioId = usuarioClient.criarUsuarioERetornarId(usuarioValido());
+
+        usuarioClient.deletarUsuarioSemToken(usuarioId)
+                .then()
+                .statusCode(401)
+                .body("error", containsString("Unauthorized"));
+
+        logger.info("Falha ao deletar usuário sem token");
     }
 
 }
