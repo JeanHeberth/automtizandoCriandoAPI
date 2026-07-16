@@ -16,6 +16,10 @@ public class UsuarioClient {
                 .post(USUARIOS.getUrl());
     }
 
+    public Response criarUsuarioSemToken(UsuarioRequest usuario) {
+        return criarUsuario(usuario);
+    }
+
     public Response listarUsuarios(String token) {
         return given()
                 .contentType(ContentType.JSON)

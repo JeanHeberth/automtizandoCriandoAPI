@@ -33,6 +33,22 @@ public class UsuarioTest extends BaseTest {
         logger.info("Usuário criado: " + usuario.getNome());
     }
 
+    @Test(description = "Deve falhar ao criar um usuário com email duplicado")
+    public void testCriarUsuarioComEmailDuplicado() {
+        logger.info("Executando teste de criação de usuário com email duplicado");
+
+        UsuarioRequest usuario = usuarioValido();
+        usuarioClient.criarUsuario(usuario)
+                .then()
+                .statusCode(201);
+
+        usuarioClient.criarUsuario(usuario)
+                .then()
+                .statusCode(409);
+
+        logger.info("Falha ao criar usuário com email duplicado: " + usuario.getEmail());
+    }
+
     @Test(description = "Deve falhar ao criar um usuário com nome vazio")
     public void testCriarUsuarioComNomeVazio() {
         logger.info("Executando teste de criação de usuário com nome vazio");
@@ -205,6 +221,66 @@ public class UsuarioTest extends BaseTest {
                 .body("email", equalTo(usuarioAtualizado.getEmail()));
 
         logger.info("Atualização de usuário " + usuarioId + " realizada com sucesso");
+    }
+
+    @Test(description = "Deve falhar ao atualizar usuário com nome vazio")
+    public void testAtualizarUsuarioComNomeVazio() {
+        logger.info("Executando teste de atualização de usuário com nome vazio");
+
+        Integer usuarioId = usuarioClient.criarUsuarioERetornarId(usuarioValido());
+
+        usuarioClient.atualizarUsuario(token, usuarioId, usuarioNomeVazio())
+                .then()
+                .statusCode(400);
+
+        logger.info("Falha ao atualizar usuário com nome vazio");
+    }
+
+    @Test(description = "Deve falhar ao atualizar usuário com email inválido")
+    public void testAtualizarUsuarioComEmailInvalido() {
+        logger.info("Executando teste de atualização de usuário com email inválido");
+
+        Integer usuarioId = usuarioClient.criarUsuarioERetornarId(usuarioValido());
+
+        usuarioClient.atualizarUsuario(token, usuarioId, usuarioComEmailInvalido())
+                .then()
+                .statusCode(400);
+
+        logger.info("Falha ao atualizar usuário com email inválido");
+    }
+
+    @Test(description = "Deve falhar ao atualizar usuário com senha vazia")
+    public void testAtualizarUsuarioComSenhaVazia() {
+        logger.info("Executando teste de atualização de usuário com senha vazia");
+
+        Integer usuarioId = usuarioClient.criarUsuarioERetornarId(usuarioValido());
+
+        usuarioClient.atualizarUsuario(token, usuarioId, usuarioComSenhaVazia())
+                .then()
+                .statusCode(400);
+
+        logger.info("Falha ao atualizar usuário com senha vazia");
+    }
+
+    @Test(description = "Deve retornar 409 ao atualizar usuário com email duplicado")
+    public void testAtualizarUsuarioComEmailDuplicado() {
+        logger.info("Executando teste de atualização de usuário com email duplicado");
+
+        UsuarioRequest usuario1 = usuarioValido();
+        UsuarioRequest usuario2 = usuarioValido();
+
+        Integer usuarioId1 = usuarioClient.criarUsuarioERetornarId(usuario1);
+        usuarioClient.criarUsuario(usuario2)
+                .then()
+                .statusCode(201);
+
+        usuario1.setEmail(usuario2.getEmail());
+
+        usuarioClient.atualizarUsuario(token, usuarioId1, usuario1)
+                .then()
+                .statusCode(409);
+
+        logger.info("Falha ao atualizar usuário com email duplicado");
     }
 
     @Test(description = "Deve retornar 404 ao atualizar usuario inexistente")

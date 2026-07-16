@@ -74,4 +74,54 @@ public class AuthTest extends BaseTest {
 
         logger.info("Teste concluído: loginComCredenciaisInvalidas");
     }
+
+    @Test(description = "Deve retornar 400 ao registrar uma conta com email inválido")
+    public void registroComEmailInvalido() {
+        logger.info("Executando teste: registroComEmailInvalido");
+
+        UsuarioRequest usuario = usuarioValido();
+        usuario.setEmail("email-invalido");
+
+        authClient.registro(usuario)
+                .then()
+                .statusCode(400);
+
+        logger.info("Teste concluído: registroComEmailInvalido");
+    }
+
+    @Test(description = "Deve retornar 400 ao registrar uma conta com senha vazia")
+    public void registroComSenhaVazia() {
+        logger.info("Executando teste: registroComSenhaVazia");
+
+        UsuarioRequest usuario = usuarioValido();
+        usuario.setSenha("");
+
+        authClient.registro(usuario)
+                .then()
+                .statusCode(400);
+
+        logger.info("Teste concluído: registroComSenhaVazia");
+    }
+
+    @Test(description = "Deve retornar 400 ao autenticar com email vazio")
+    public void loginComEmailVazio() {
+        logger.info("Executando teste: loginComEmailVazio");
+
+        authClient.login("", "SenhaSegura123!")
+                .then()
+                .statusCode(400);
+
+        logger.info("Teste concluído: loginComEmailVazio");
+    }
+
+    @Test(description = "Deve retornar 400 ao autenticar com senha vazia")
+    public void loginComSenhaVazia() {
+        logger.info("Executando teste: loginComSenhaVazia");
+
+        authClient.login("usuario@teste.com", "")
+                .then()
+                .statusCode(400);
+
+        logger.info("Teste concluído: loginComSenhaVazia");
+    }
 }

@@ -2,6 +2,7 @@ package clients.produto;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import models.request.produto.AtualizarEstoqueRequest;
 import models.request.produto.ProdutoRequest;
 
@@ -85,10 +86,26 @@ public class ProdutoClient {
                 .put(PRODUTOS.getUrl() + "/" + produtoId);
     }
 
+    public Response atualizarProdutoSemToken(Integer produtoId, ProdutoRequest produto) {
+        return given()
+                .contentType(ContentType.JSON)
+                .body(produto)
+                .when()
+                .put(PRODUTOS.getUrl() + "/" + produtoId);
+    }
+
     public Response atualizarEstoque(String token, Integer produtoId, AtualizarEstoqueRequest estoque) {
         return given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + token)
+                .body(estoque)
+                .when()
+                .patch(PRODUTOS.getUrl() + "/" + produtoId + "/estoque");
+    }
+
+    public Response atualizarEstoqueSemToken(Integer produtoId, AtualizarEstoqueRequest estoque) {
+        return given()
+                .contentType(ContentType.JSON)
                 .body(estoque)
                 .when()
                 .patch(PRODUTOS.getUrl() + "/" + produtoId + "/estoque");
@@ -107,5 +124,36 @@ public class ProdutoClient {
                 .contentType(ContentType.JSON)
                 .when()
                 .delete(PRODUTOS.getUrl() + "/" + produtoId);
+    }
+
+    public Response listarProdutosComFiltros(String nome, String categoria, Double precoMin, Double precoMax, Integer page, Integer size, String sort) {
+        RequestSpecification request = given()
+                .contentType(ContentType.JSON);
+
+        if (nome != null) {
+            request.queryParam("nome", nome);
+        }
+        if (categoria != null) {
+            request.queryParam("categoria", categoria);
+        }
+        if (precoMin != null) {
+            request.queryParam("precoMin", precoMin);
+        }
+        if (precoMax != null) {
+            request.queryParam("precoMax", precoMax);
+        }
+        if (page != null) {
+            request.queryParam("page", page);
+        }
+        if (size != null) {
+            request.queryParam("size", size);
+        }
+        if (sort != null) {
+            request.queryParam("sort", sort);
+        }
+
+        return request
+                .when()
+                .get(PRODUTOS.getUrl());
     }
 }
