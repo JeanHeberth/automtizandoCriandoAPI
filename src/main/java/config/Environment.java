@@ -9,16 +9,8 @@ public final class Environment {
         String email = System.getenv("API_EMAIL");
 
         if (email == null || email.isBlank()) {
-            throw new IllegalStateException(
-                    "Variável de ambiente API_EMAIL não encontrada."
-            );
+            email = Configuration.getUsuario();
         }
-
-        email = email.trim();
-
-        System.out.println("API_EMAIL recebida: SIM");
-        System.out.println("Tamanho do email: " + email.length());
-        System.out.println("Email possui @: " + email.contains("@"));
 
         return email;
     }
@@ -27,14 +19,9 @@ public final class Environment {
         String senha = System.getenv("API_SENHA");
 
         if (senha == null || senha.isBlank()) {
-            throw new IllegalStateException(
-                    "Variável de ambiente API_SENHA não encontrada."
-            );
+            senha = Configuration.getSenha();
         }
 
-        System.out.println("API_SENHA recebida: SIM");
-        System.out.println("Tamanho da senha: " + senha.length());
-
-        return senha;
+        return senha.trim();
     }
 }
