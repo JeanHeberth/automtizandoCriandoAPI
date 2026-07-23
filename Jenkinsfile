@@ -70,7 +70,49 @@ pipeline {
                 }
             }
         }
+        stage('Validar Credenciais') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        sh '''
+                            echo "Verificando credenciais..."
 
+                            if [ -z "$API_USER" ]; then
+                                echo "ERRO: API_USER nao foi carregado."
+                                exit 1
+                            fi
+
+                            if [ -z "$API_USER_PSW" ]; then
+                                echo "ERRO: API_USER_PSW nao foi carregado."
+                                exit 1
+                            fi
+
+                            echo "Usuario carregado: $API_USER"
+                            echo "Senha carregada: SIM"
+                            echo "Quantidade de caracteres da senha: ${#API_USER_PSW}"
+                        '''
+                    } else {
+                        powershell '''
+                            Write-Host "Verificando credenciais..."
+
+                            if ([string]::IsNullOrWhiteSpace($env:API_USER)) {
+                                Write-Host "ERRO: API_USER nao foi carregado."
+                                exit 1
+                            }
+
+                            if ([string]::IsNullOrWhiteSpace($env:API_USER_PSW)) {
+                                Write-Host "ERRO: API_USER_PSW nao foi carregado."
+                                exit 1
+                            }
+
+                            Write-Host "Usuario carregado: $env:API_USER"
+                            Write-Host "Senha carregada: SIM"
+                            Write-Host "Quantidade de caracteres da senha: $($env:API_USER_PSW.Length)"
+                        '''
+                    }
+                }
+            }
+        }
         stage('Executar Testes') {
             steps {
                 script {
