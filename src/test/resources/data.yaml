@@ -1,3 +1,2 @@
 api:
-#  baseUri: http://localhost:8089/criandoAPI/v1
   baseUri: http://100.83.72.100:9999/criandoAPI/v1
