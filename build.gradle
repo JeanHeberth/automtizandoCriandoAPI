@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'io.qameta.allure' version '4.1.0'
 }
 
 group = 'br.com.automatizandoCriandoAPI'
@@ -15,6 +16,26 @@ java {
     }
 }
 
+allure {
+    adapter {
+        allureJavaVersion = '2.35.2'
+        autoconfigure = true
+        autoconfigureListeners = true
+        resultsDir = layout.buildDirectory.dir('allure-results')
+
+        frameworks {
+            testng {
+                enabled = true
+            }
+        }
+    }
+
+    report {
+        dependsOnTests = true
+        reportDir.set(layout.buildDirectory.dir('allure-report'))
+    }
+}
+
 dependencies {
     implementation 'io.rest-assured:rest-assured:5.5.0'
     implementation 'org.yaml:snakeyaml:2.3'
@@ -24,41 +45,69 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:2.0.16'
     implementation 'org.slf4j:slf4j-simple:2.0.16'
 
-    implementation 'org.projectlombok:lombok:1.18.46'
+    compileOnly 'org.projectlombok:lombok:1.18.46'
     annotationProcessor 'org.projectlombok:lombok:1.18.46'
 
     testImplementation 'org.testng:testng:7.10.2'
+    testImplementation 'io.qameta.allure:allure-testng:2.35.2'
 }
-tasks.register('testAuth', Test) {
+
+tasks.withType(Test).configureEach {
+
     useTestNG()
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    systemProperty(
+            'allure.results.directory',
+            layout.buildDirectory
+                    .dir('allure-results')
+                    .get()
+                    .asFile
+                    .absolutePath
+    )
+
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat 'full'
+        showStandardStreams = true
+    }
+}
+
+tasks.register('testAuth', Test) {
+    description = 'Executa os testes de autenticação.'
+    group = 'verification'
+
     include '**/auth/**'
 }
 
 tasks.register('testHealth', Test) {
-    useTestNG()
+    description = 'Executa os testes de health check.'
+    group = 'verification'
+
     include '**/health/**'
 }
 
 tasks.register('testPedido', Test) {
-    useTestNG()
+    description = 'Executa os testes de pedido.'
+    group = 'verification'
+
     include '**/pedido/**'
 }
 
 tasks.register('testProduto', Test) {
-    useTestNG()
+    description = 'Executa os testes de produto.'
+    group = 'verification'
+
     include '**/produto/**'
 }
 
 tasks.register('testUsuario', Test) {
-    useTestNG()
+    description = 'Executa os testes de usuário.'
+    group = 'verification'
+
     include '**/usuario/**'
 }
 
 test {
-    useTestNG() {
-    }
-
-    testLogging {
-        events "passed", "skipped", "failed"
-    }
+    description = 'Executa todos os testes automatizados.'
 }
