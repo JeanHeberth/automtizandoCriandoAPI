@@ -9,6 +9,7 @@ pipeline {
     options {
         timestamps()
         disableConcurrentBuilds()
+        skipDefaultCheckout(true)
     }
 
     stages {
@@ -98,8 +99,6 @@ pipeline {
 
                                 echo "Email carregado: SIM"
                                 echo "Tamanho do email: ${#API_EMAIL}"
-                                echo "Email possui arroba: $(echo "$API_EMAIL" | grep -q "@" && echo SIM || echo NAO)"
-
                                 echo "Senha carregada: SIM"
                                 echo "Tamanho da senha: ${#API_SENHA}"
                             '''
@@ -119,8 +118,6 @@ pipeline {
 
                                 Write-Host "Email carregado: SIM"
                                 Write-Host "Tamanho do email: $($env:API_EMAIL.Length)"
-                                Write-Host "Email possui arroba: $($env:API_EMAIL.Contains('@'))"
-
                                 Write-Host "Senha carregada: SIM"
                                 Write-Host "Tamanho da senha: $($env:API_SENHA.Length)"
                             '''
@@ -130,51 +127,252 @@ pipeline {
             }
         }
 
-        stage('Executar Testes') {
+        stage('Preparar Projeto') {
             steps {
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'login-pipeline',
-                        usernameVariable: 'API_EMAIL',
-                        passwordVariable: 'API_SENHA'
-                    )
-                ]) {
-                    script {
-                        if (isUnix()) {
-                            sh '''
-                                echo "Executando testes com credenciais..."
+                script {
+                    if (isUnix()) {
+                        sh '''
+                            chmod +x gradlew
 
-                                chmod +x gradlew
+                            ./gradlew clean testClasses \
+                                --stacktrace \
+                                --no-daemon
+                        '''
+                    } else {
+                        bat '''
+                            @echo off
 
-                                ./gradlew clean test \
-                                    --stacktrace \
-                                    --info \
-                                    --no-daemon
-                            '''
-                        } else {
-                            bat '''
-                                @echo off
+                            call gradlew.bat clean testClasses ^
+                                --stacktrace ^
+                                --no-daemon
 
-                                echo Executando testes com credenciais...
+                            exit /b %ERRORLEVEL%
+                        '''
+                    }
+                }
+            }
+        }
 
-                                call gradlew.bat clean test ^
-                                    --stacktrace ^
-                                    --info ^
-                                    --no-daemon
+        stage('Testes de Autenticação') {
+            steps {
+                catchError(
+                    buildResult: 'FAILURE',
+                    stageResult: 'FAILURE'
+                ) {
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'login-pipeline',
+                            usernameVariable: 'API_EMAIL',
+                            passwordVariable: 'API_SENHA'
+                        )
+                    ]) {
+                        script {
+                            if (isUnix()) {
+                                sh '''
+                                    echo "Executando testes de autenticação..."
 
-                                exit /b %ERRORLEVEL%
-                            '''
+                                    ./gradlew testAuth \
+                                        --stacktrace \
+                                        --info \
+                                        --no-daemon
+                                '''
+                            } else {
+                                bat '''
+                                    @echo off
+
+                                    echo Executando testes de autenticacao...
+
+                                    call gradlew.bat testAuth ^
+                                        --stacktrace ^
+                                        --info ^
+                                        --no-daemon
+
+                                    exit /b %ERRORLEVEL%
+                                '''
+                            }
                         }
                     }
                 }
             }
         }
 
-        stage('Publicar Resultado') {
+        stage('Testes de Health Check') {
+            steps {
+                catchError(
+                    buildResult: 'FAILURE',
+                    stageResult: 'FAILURE'
+                ) {
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'login-pipeline',
+                            usernameVariable: 'API_EMAIL',
+                            passwordVariable: 'API_SENHA'
+                        )
+                    ]) {
+                        script {
+                            if (isUnix()) {
+                                sh '''
+                                    echo "Executando testes de health check..."
+
+                                    ./gradlew testHealth \
+                                        --stacktrace \
+                                        --info \
+                                        --no-daemon
+                                '''
+                            } else {
+                                bat '''
+                                    @echo off
+
+                                    echo Executando testes de health check...
+
+                                    call gradlew.bat testHealth ^
+                                        --stacktrace ^
+                                        --info ^
+                                        --no-daemon
+
+                                    exit /b %ERRORLEVEL%
+                                '''
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Testes de Pedido') {
+            steps {
+                catchError(
+                    buildResult: 'FAILURE',
+                    stageResult: 'FAILURE'
+                ) {
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'login-pipeline',
+                            usernameVariable: 'API_EMAIL',
+                            passwordVariable: 'API_SENHA'
+                        )
+                    ]) {
+                        script {
+                            if (isUnix()) {
+                                sh '''
+                                    echo "Executando testes de pedido..."
+
+                                    ./gradlew testPedido \
+                                        --stacktrace \
+                                        --info \
+                                        --no-daemon
+                                '''
+                            } else {
+                                bat '''
+                                    @echo off
+
+                                    echo Executando testes de pedido...
+
+                                    call gradlew.bat testPedido ^
+                                        --stacktrace ^
+                                        --info ^
+                                        --no-daemon
+
+                                    exit /b %ERRORLEVEL%
+                                '''
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Testes de Produto') {
+            steps {
+                catchError(
+                    buildResult: 'FAILURE',
+                    stageResult: 'FAILURE'
+                ) {
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'login-pipeline',
+                            usernameVariable: 'API_EMAIL',
+                            passwordVariable: 'API_SENHA'
+                        )
+                    ]) {
+                        script {
+                            if (isUnix()) {
+                                sh '''
+                                    echo "Executando testes de produto..."
+
+                                    ./gradlew testProduto \
+                                        --stacktrace \
+                                        --info \
+                                        --no-daemon
+                                '''
+                            } else {
+                                bat '''
+                                    @echo off
+
+                                    echo Executando testes de produto...
+
+                                    call gradlew.bat testProduto ^
+                                        --stacktrace ^
+                                        --info ^
+                                        --no-daemon
+
+                                    exit /b %ERRORLEVEL%
+                                '''
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Testes de Usuário') {
+            steps {
+                catchError(
+                    buildResult: 'FAILURE',
+                    stageResult: 'FAILURE'
+                ) {
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'login-pipeline',
+                            usernameVariable: 'API_EMAIL',
+                            passwordVariable: 'API_SENHA'
+                        )
+                    ]) {
+                        script {
+                            if (isUnix()) {
+                                sh '''
+                                    echo "Executando testes de usuário..."
+
+                                    ./gradlew testUsuario \
+                                        --stacktrace \
+                                        --info \
+                                        --no-daemon
+                                '''
+                            } else {
+                                bat '''
+                                    @echo off
+
+                                    echo Executando testes de usuario...
+
+                                    call gradlew.bat testUsuario ^
+                                        --stacktrace ^
+                                        --info ^
+                                        --no-daemon
+
+                                    exit /b %ERRORLEVEL%
+                                '''
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Publicar Resultados') {
             steps {
                 junit(
                     allowEmptyResults: true,
-                    testResults: '**/build/test-results/test/*.xml'
+                    testResults: '**/build/test-results/**/*.xml'
                 )
             }
         }
@@ -182,11 +380,15 @@ pipeline {
 
     post {
         success {
-            echo 'Todos os testes foram aprovados.'
+            echo 'Todos os grupos de testes foram aprovados.'
+        }
+
+        unstable {
+            echo 'A pipeline foi concluída com testes instáveis.'
         }
 
         failure {
-            echo 'Um ou mais testes falharam.'
+            echo 'Um ou mais grupos de testes falharam.'
         }
 
         always {
