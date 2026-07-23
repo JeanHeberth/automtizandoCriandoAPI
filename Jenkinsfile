@@ -376,14 +376,11 @@ pipeline {
         stage('Publicar Allure Report') {
             steps {
                 allure([
-                    includeProperties: false,
-                    jdk: '',
-                    properties: [],
-                    reportBuildPolicy: 'ALWAYS',
-                    results: [
-                        [
-                            path: 'build/allure-results'
-                        ]
+                       jdk: '',
+                        commandline: 'Allure',
+                        includeProperties: false,
+                        reportBuildPolicy: 'ALWAYS',
+                        results: [[path: 'build/allure-results']]
                     ]
                 ])
             }
