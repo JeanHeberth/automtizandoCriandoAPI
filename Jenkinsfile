@@ -388,7 +388,8 @@ pipeline {
                 ])
             }
         }
-    }
+
+    } // fecha o bloco stages
 
     post {
         success {
