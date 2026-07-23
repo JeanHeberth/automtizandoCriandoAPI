@@ -375,17 +375,17 @@ pipeline {
 
         stage('Publicar Allure Report') {
             steps {
-                allure([
-                       jdk: '',
-                        commandline: 'Allure',
-                        includeProperties: false,
-                        reportBuildPolicy: 'ALWAYS',
-                        results: [[path: 'build/allure-results']]
-                    ]
-                ])
+                allure(
+                    includeProperties: false,
+                    jdk: '',
+                    properties: [],
+                    reportBuildPolicy: 'ALWAYS',
+                    results: [[path: 'build/allure-results']]
+                )
             }
         }
-    }
+
+    } // fecha o bloco stages
 
     post {
         success {
