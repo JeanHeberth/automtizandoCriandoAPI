@@ -1,9 +1,5 @@
 package produto;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -22,6 +18,8 @@ import static factories.produto.ProdutoFactory.produtoComNomeVazio;
 import static factories.produto.ProdutoFactory.produtoComPrecoNegativo;
 import static factories.produto.ProdutoFactory.produtoValidoComCategoria;
 import static factories.produto.ProdutoFactory.produtoValido;
+import static org.hamcrest.Matchers.*;
+
 import models.request.produto.ProdutoRequest;
 
 @Test(groups = "produtos")
@@ -103,10 +101,19 @@ public class ProdutoTest extends BaseTest {
         ProdutoRequest produto = produtoValidoComCategoria("ELETRONICO");
         produtoClient.criarProdutoERetornarId(token, produto);
 
-        produtoClient.listarProdutosPorCategoria("ELETRONICO", 0, 100, "nome,asc")
+        produtoClient.listarProdutosPorCategoria(
+                        "ELETRONICO",
+                        0,
+                        100,
+                        "nome,asc"
+                )
                 .then()
                 .statusCode(200)
-                .body("content.nome", hasItem(produto.getNome()));
+                .body("content", not(empty()))
+                .body(
+                        "content.categoria",
+                        everyItem(equalTo("ELETRONICO"))
+                );
 
         logger.info("Teste concluído: listarProdutosPorCategoriaComSucesso");
     }
