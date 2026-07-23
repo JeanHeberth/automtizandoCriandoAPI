@@ -388,7 +388,7 @@ pipeline {
                 ])
             }
         }
-
+    }
 
     post {
         success {
