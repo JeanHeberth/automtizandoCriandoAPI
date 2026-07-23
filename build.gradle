@@ -29,7 +29,30 @@ dependencies {
 
     testImplementation 'org.testng:testng:7.10.2'
 }
+tasks.register('testAuth', Test) {
+    useTestNG()
+    include '**/auth/**'
+}
 
+tasks.register('testHealth', Test) {
+    useTestNG()
+    include '**/health/**'
+}
+
+tasks.register('testPedido', Test) {
+    useTestNG()
+    include '**/pedido/**'
+}
+
+tasks.register('testProduto', Test) {
+    useTestNG()
+    include '**/produto/**'
+}
+
+tasks.register('testUsuario', Test) {
+    useTestNG()
+    include '**/usuario/**'
+}
 
 test {
     useTestNG() {
