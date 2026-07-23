@@ -375,30 +375,20 @@ pipeline {
 
         stage('Publicar Allure Report') {
             steps {
-                script {
-                    def allureResults = findFiles(
-                        glob: '**/build/allure-results/*'
-                    )
-
-                    if (allureResults.length > 0) {
-                        allure([
-                            includeProperties: false,
-                            jdk: '',
-                            properties: [],
-                            reportBuildPolicy: 'ALWAYS',
-                            results: [
-                                [
-                                    path: 'build/allure-results'
-                                ]
-                            ]
-                        ])
-                    } else {
-                        echo 'AVISO: Nenhum resultado do Allure foi encontrado.'
-                    }
-                }
+                allure([
+                    includeProperties: false,
+                    jdk: '',
+                    properties: [],
+                    reportBuildPolicy: 'ALWAYS',
+                    results: [
+                        [
+                            path: 'build/allure-results'
+                        ]
+                    ]
+                ])
             }
         }
-    }
+
 
     post {
         success {
