@@ -2,6 +2,8 @@ pipeline {
     agent any
 
     environment {
+        API_USER = credentials('login-pipeline')
+
         API_URL_WINDOWS = 'http://100.83.72.100:9999/criandoAPI/v1/actuator/health'
         API_URL_UNIX    = 'http://100.83.72.100:9999/criandoAPI/v1/actuator/health'
     }
@@ -74,15 +76,21 @@ pipeline {
                 script {
                     if (isUnix()) {
                         sh '''
+                            export EMAIL="$API_USER_USR"
+                            export PASSWORD="$API_USER_PSW"
+
                             chmod +x gradlew
                             ./gradlew clean test
                         '''
                     } else {
                         bat '''
                             @echo off
-                            echo Executando testes...
-                            gradlew.bat clean test
-                        '''
+
+                            set EMAIL=%API_USER_USR%
+                            set PASSWORD=%API_USER_PSW%
+
+                            echo Executando testes com credenciais...
+                            gradlew.bat clean test --stacktrace --info --no-daemon                        '''
                     }
                 }
             }
