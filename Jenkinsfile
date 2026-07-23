@@ -98,9 +98,7 @@ pipeline {
                                 fi
 
                                 echo "Email carregado: SIM"
-                                echo "Tamanho do email: ${#API_EMAIL}"
                                 echo "Senha carregada: SIM"
-                                echo "Tamanho da senha: ${#API_SENHA}"
                             '''
                         } else {
                             powershell '''
@@ -117,9 +115,7 @@ pipeline {
                                 }
 
                                 Write-Host "Email carregado: SIM"
-                                Write-Host "Tamanho do email: $($env:API_EMAIL.Length)"
                                 Write-Host "Senha carregada: SIM"
-                                Write-Host "Tamanho da senha: $($env:API_SENHA.Length)"
                             '''
                         }
                     }
@@ -368,7 +364,7 @@ pipeline {
             }
         }
 
-        stage('Publicar Resultados') {
+        stage('Publicar Resultados JUnit') {
             steps {
                 junit(
                     allowEmptyResults: true,
@@ -376,7 +372,22 @@ pipeline {
                 )
             }
         }
-    }
+
+        stage('Publicar Allure Report') {
+            steps {
+                allure([
+                    includeProperties: false,
+                    jdk: '',
+                    properties: [],
+                    reportBuildPolicy: 'ALWAYS',
+                    results: [
+                        [
+                            path: 'build/allure-results'
+                        ]
+                    ]
+                ])
+            }
+        }
 
     post {
         success {
@@ -394,6 +405,11 @@ pipeline {
         always {
             archiveArtifacts(
                 artifacts: '**/build/reports/tests/**',
+                allowEmptyArchive: true
+            )
+
+            archiveArtifacts(
+                artifacts: '**/build/allure-results/**',
                 allowEmptyArchive: true
             )
 
