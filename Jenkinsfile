@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        API_USER = credentials('login-pipeline')
+    }
+
     options {
         timestamps()
         disableConcurrentBuilds()
@@ -30,9 +34,17 @@ pipeline {
             steps {
                 script {
                     if (isUnix()) {
-                        sh './gradlew clean test'
+                        sh """
+                            echo "Usuário: $API_USER_USR"
+                            echo "Senha: $API_USER_PSW"
+                            ./gradlew clean test
+                        """
                     } else {
-                        bat 'gradlew.bat clean test'
+                        bat """
+                            echo Usuário: %API_USER_USR%
+                            echo Senha: %API_USER_PSW%
+                            gradlew.bat clean test
+                        """
                     }
                 }
             }
