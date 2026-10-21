@@ -60,7 +60,7 @@ public class ProdutoTest extends BaseTest {
     public void listarProdutoComSucesso() {
 
         logger.info("Executando teste: listarProdutoComSucesso");
-        produtoClient.listarProdutos()
+        produtoClient.listarProdutos(token)
                 .then()
                 .statusCode(200);
 
@@ -74,7 +74,7 @@ public class ProdutoTest extends BaseTest {
         ProdutoRequest produto = produtoValido();
         produtoClient.criarProdutoERetornarId(token, produto);
 
-        produtoClient.listarProdutosPorNome(produto.getNome(), 0, 5, "nome,asc")
+        produtoClient.listarProdutosPorNome(token, produto.getNome(), 0, 5, "nome,asc")
                 .then()
                 .statusCode(200)
                 .body("content.nome", hasItem(produto.getNome()));
@@ -86,7 +86,7 @@ public class ProdutoTest extends BaseTest {
     public void listarProdutosPorNomeSemResultado() {
         logger.info("Executando teste: listarProdutosPorNomeSemResultado");
 
-        produtoClient.listarProdutosPorNome("nome-inexistente-" + System.currentTimeMillis(), 0, 5, "nome,asc")
+        produtoClient.listarProdutosPorNome(token, "nome-inexistente-" + System.currentTimeMillis(), 0, 5, "nome,asc")
                 .then()
                 .statusCode(200)
                 .body("content", hasSize(0));
@@ -102,6 +102,7 @@ public class ProdutoTest extends BaseTest {
         produtoClient.criarProdutoERetornarId(token, produto);
 
         produtoClient.listarProdutosPorCategoria(
+                token,
                         "ELETRONICO",
                         0,
                         100,
@@ -122,7 +123,7 @@ public class ProdutoTest extends BaseTest {
     public void listarProdutosComCategoriaInvalida() {
         logger.info("Executando teste: listarProdutosComCategoriaInvalida");
 
-        produtoClient.listarProdutosComFiltros(null, "TESTE", null, null, 0, 5, "nome,asc")
+        produtoClient.listarProdutosComFiltros(token, null, "TESTE", null, null, 0, 5, "nome,asc")
                 .then()
                 .statusCode(400);
 
@@ -135,7 +136,7 @@ public class ProdutoTest extends BaseTest {
         logger.info("Executando teste: buscarProdutoPorId");
 
         Integer produtoId = produtoClient.criarProdutoERetornarId(token, produtoValido());
-        produtoClient.buscarProdutoPorId(produtoId)
+        produtoClient.buscarProdutoPorId(token, produtoId)
                 .then()
                 .statusCode(200);
 
@@ -148,7 +149,7 @@ public class ProdutoTest extends BaseTest {
 
         logger.info("Executando teste: Buscar Produto Por Id Inexistente");
 
-        produtoClient.buscarProdutoPorId(ID_INEXISTENTE)
+        produtoClient.buscarProdutoPorId(token, ID_INEXISTENTE)
                 .then()
                 .statusCode(404)
                 .body("mensagem", containsString("Produto não encontrado com id: " + ID_INEXISTENTE));
@@ -163,7 +164,7 @@ public class ProdutoTest extends BaseTest {
         produtoClient.criarProdutoSemAutenticacao(produtoValido())
                 .then()
                 .statusCode(401)
-                .body("error", containsString("Unauthorized"));
+                .body("mensagem", containsString("Token ausente"));
 
         logger.info("Teste concluído: criarProdutoSemAutenticacao");
     }
@@ -424,7 +425,7 @@ public class ProdutoTest extends BaseTest {
         produtoClient.deletarProdutoSemAutenticacao(produtoId)
                 .then()
                 .statusCode(401)
-                .body("error", containsString("Unauthorized"));
+                .body("mensagem", containsString("Token ausente"));
 
         logger.info("Teste concluído: deletarProdutoSemAutenticacao");
     }

@@ -33,16 +33,18 @@ public class ProdutoClient {
                 .post(PRODUTOS.getUrl());
     }
 
-    public Response listarProdutos() {
+    public Response listarProdutos(String token) {
         return given()
                 .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
                 .when()
                 .get(PRODUTOS.getUrl());
     }
 
-    public Response listarProdutosPorNome(String nome, Integer page, Integer size, String sort) {
+    public Response listarProdutosPorNome(String token, String nome, Integer page, Integer size, String sort) {
         return given()
                 .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
                 .queryParam("nome", nome)
                 .queryParam("page", page)
                 .queryParam("size", size)
@@ -51,9 +53,10 @@ public class ProdutoClient {
                 .get(PRODUTOS.getUrl());
     }
 
-    public Response listarProdutosPorCategoria(String categoria, Integer page, Integer size, String sort) {
+    public Response listarProdutosPorCategoria(String token, String categoria, Integer page, Integer size, String sort) {
         return given()
                 .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
                 .queryParam("page", page)
                 .queryParam("size", size)
                 .queryParam("sort", sort)
@@ -61,9 +64,10 @@ public class ProdutoClient {
                 .get(PRODUTOS.getUrl() + "/categoria/" + categoria);
     }
 
-    public Response buscarProdutoPorId(Integer produtoId) {
+    public Response buscarProdutoPorId(String token, Integer produtoId) {
         return given()
                 .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
                 .when()
                 .get(PRODUTOS.getUrl() + "/" + produtoId);
     }
@@ -126,9 +130,10 @@ public class ProdutoClient {
                 .delete(PRODUTOS.getUrl() + "/" + produtoId);
     }
 
-    public Response listarProdutosComFiltros(String nome, String categoria, Double precoMin, Double precoMax, Integer page, Integer size, String sort) {
+    public Response listarProdutosComFiltros(String token, String nome, String categoria, Double precoMin, Double precoMax, Integer page, Integer size, String sort) {
         RequestSpecification request = given()
-                .contentType(ContentType.JSON);
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token);
 
         if (nome != null) {
             request.queryParam("nome", nome);

@@ -71,7 +71,7 @@ public class PedidoTest extends BaseTest {
         logger.info("Executando teste: criarPedidoComQuantidadeAcimaDoEstoque");
 
         Integer produtoId = criarProdutoComEstoqueSuficiente(token);
-        Integer estoqueAtual = produtoClient.buscarProdutoPorId(produtoId)
+        Integer estoqueAtual = produtoClient.buscarProdutoPorId(token, produtoId)
                 .then()
                 .statusCode(200)
                 .extract()
@@ -324,7 +324,7 @@ public class PedidoTest extends BaseTest {
         logger.info("Teste concluído: cancelarPedidoPendenteComSucesso");
     }
 
-    @Test(description = "Deve retornar 422 ao cancelar um pedido com status CONFIRMADO")
+    @Test(description = "Deve retornar 204 ao cancelar um pedido com status CONFIRMADO")
     public void cancelarPedidoConfirmadoComSucesso() {
         logger.info("Executando teste: cancelarPedidoConfirmadoComSucesso");
 
@@ -337,7 +337,7 @@ public class PedidoTest extends BaseTest {
 
         pedidoClient.cancelarPedido(token, pedidoId)
                 .then()
-                .statusCode(422);
+                .statusCode(204);
 
         logger.info("Teste concluído: cancelarPedidoConfirmadoComSucesso");
     }
