@@ -7,9 +7,11 @@ import org.testng.annotations.Test;
 
 import java.util.logging.Logger;
 
+import static auth.AuthService.getToken;
 import static constants.Ids.ID_INEXISTENTE;
 import static constants.Ids.NOME_INEXISTENTE;
 import static factories.usuario.UsuarioFactory.*;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -139,7 +141,7 @@ public class UsuarioTest extends BaseTest {
         usuarioClient.listarUsuarios("token_invalido")
                 .then()
                 .statusCode(401)
-                .body("error", containsString("Unauthorized"));
+                .body("mensagem", containsString("Token invalido"));
 
         logger.info("Falha ao listar usuários com token inválido");
     }
@@ -150,7 +152,7 @@ public class UsuarioTest extends BaseTest {
         usuarioClient.listarUsuarios(null)
                 .then()
                 .statusCode(401)
-                .body("error", containsString("Unauthorized"));
+                .body("mensagem", containsString("Token invalido"));
 
         logger.info("Falha ao listar usuários sem token");
     }
@@ -159,8 +161,11 @@ public class UsuarioTest extends BaseTest {
     public void testBuscarUsuarioPorId() {
         logger.info("Executando teste de busca de usuário por ID");
 
-        Integer usuarioId = usuarioClient.criarUsuarioERetornarId(usuarioValido());
-        usuarioClient.buscarUsuarioPorId(token, usuarioId)
+        UsuarioRequest usuario = usuarioValido();
+        Integer usuarioId = usuarioClient.criarUsuarioERetornarId(usuario);
+        String tokenDoUsuario = getToken(usuario.getEmail(), usuario.getSenha());
+
+        usuarioClient.buscarUsuarioPorId(tokenDoUsuario, usuarioId)
                 .then()
                 .statusCode(200);
 
@@ -172,8 +177,8 @@ public class UsuarioTest extends BaseTest {
         logger.info("Executando teste de busca de usuário por ID inexistente");
         usuarioClient.buscarUsuarioPorId(token, ID_INEXISTENTE)
                 .then()
-                .statusCode(404)
-                .body("mensagem", containsString("Usuario nao encontrado com id: " + ID_INEXISTENTE));
+                .statusCode(403)
+                .body("codigo", equalTo("ACESSO_NEGADO"));
 
         logger.info("Falha ao buscar usuário " + ID_INEXISTENTE + " inexistente");
     }
@@ -211,10 +216,12 @@ public class UsuarioTest extends BaseTest {
     public void testAtualizarUsuario() {
         logger.info("Executando teste de atualização de usuário");
 
-        Integer usuarioId = usuarioClient.criarUsuarioERetornarId(usuarioValido());
+        UsuarioRequest usuario = usuarioValido();
+        Integer usuarioId = usuarioClient.criarUsuarioERetornarId(usuario);
+        String tokenDoUsuario = getToken(usuario.getEmail(), usuario.getSenha());
         UsuarioRequest usuarioAtualizado = usuarioValido();
 
-        usuarioClient.atualizarUsuario(token, usuarioId, usuarioAtualizado)
+        usuarioClient.atualizarUsuario(tokenDoUsuario, usuarioId, usuarioAtualizado)
                 .then()
                 .statusCode(200)
                 .body("nome", equalTo(usuarioAtualizado.getNome()))
@@ -274,9 +281,10 @@ public class UsuarioTest extends BaseTest {
                 .then()
                 .statusCode(201);
 
+        String tokenDoUsuario1 = getToken(usuario1.getEmail(), usuario1.getSenha());
         usuario1.setEmail(usuario2.getEmail());
 
-        usuarioClient.atualizarUsuario(token, usuarioId1, usuario1)
+        usuarioClient.atualizarUsuario(tokenDoUsuario1, usuarioId1, usuario1)
                 .then()
                 .statusCode(409);
 
@@ -289,8 +297,8 @@ public class UsuarioTest extends BaseTest {
 
         usuarioClient.atualizarUsuario(token, ID_INEXISTENTE, usuarioValido())
                 .then()
-                .statusCode(404)
-                .body("mensagem", containsString("Usuario nao encontrado com id: " + ID_INEXISTENTE));
+                .statusCode(403)
+                .body("codigo", equalTo("ACESSO_NEGADO"));
 
         logger.info("Falha ao atualizar usuário inexistente");
     }
@@ -304,7 +312,7 @@ public class UsuarioTest extends BaseTest {
         usuarioClient.atualizarUsuarioSemToken(usuarioId, usuarioValido())
                 .then()
                 .statusCode(401)
-                .body("error", containsString("Unauthorized"));
+                .body("mensagem", containsString("Token ausente"));
 
         logger.info("Falha ao atualizar usuário sem token");
     }
@@ -313,15 +321,17 @@ public class UsuarioTest extends BaseTest {
     public void testDeletarUsuario() {
         logger.info("Executando teste de exclusão de usuário");
 
-        Integer usuarioId = usuarioClient.criarUsuarioERetornarId(usuarioValido());
+        UsuarioRequest usuario = usuarioValido();
+        Integer usuarioId = usuarioClient.criarUsuarioERetornarId(usuario);
+        String tokenDoUsuario = getToken(usuario.getEmail(), usuario.getSenha());
 
-        usuarioClient.deletarUsuario(token, usuarioId)
+        usuarioClient.deletarUsuario(tokenDoUsuario, usuarioId)
                 .then()
                 .statusCode(204);
 
-        usuarioClient.buscarUsuarioPorId(token, usuarioId)
+        usuarioClient.buscarUsuarioPorId(tokenDoUsuario, usuarioId)
                 .then()
-                .statusCode(404);
+                .statusCode(anyOf(equalTo(401), equalTo(404)));
 
         logger.info("Exclusão de usuário " + usuarioId + " realizada com sucesso");
     }
@@ -332,8 +342,8 @@ public class UsuarioTest extends BaseTest {
 
         usuarioClient.deletarUsuario(token, ID_INEXISTENTE)
                 .then()
-                .statusCode(404)
-                .body("mensagem", containsString("Usuario nao encontrado com id: " + ID_INEXISTENTE));
+                .statusCode(403)
+                .body("codigo", equalTo("ACESSO_NEGADO"));
 
         logger.info("Falha ao deletar usuário inexistente");
     }
@@ -347,7 +357,7 @@ public class UsuarioTest extends BaseTest {
         usuarioClient.deletarUsuarioSemToken(usuarioId)
                 .then()
                 .statusCode(401)
-                .body("error", containsString("Unauthorized"));
+                .body("mensagem", containsString("Token ausente"));
 
         logger.info("Falha ao deletar usuário sem token");
     }
