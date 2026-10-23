@@ -385,6 +385,16 @@ pipeline {
             }
         }
 
+        stage('Executar Regressão Automatizada') {
+            steps {
+                echo 'Iniciando testes regressivos da API...'
+
+                build job: 'testeCriandoAPI',
+                wait: true,
+                propagate: true
+            }
+        }
+
     } // fecha o bloco stages
 
     post {
